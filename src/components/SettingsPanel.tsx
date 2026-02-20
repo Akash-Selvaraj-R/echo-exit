@@ -16,9 +16,6 @@ import { useSafety } from "@/context/SafetyContext";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/context/AuthContext";
-import { Settings } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 
 export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boolean) => void }> = ({
     open,
