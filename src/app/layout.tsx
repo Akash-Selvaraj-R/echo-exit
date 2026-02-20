@@ -20,6 +20,8 @@ export const metadata: Metadata = {
 import { SafetyProvider } from "@/context/SafetyContext";
 import { Toaster } from "sonner";
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,10 +32,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SafetyProvider>
-          {children}
-          <Toaster position="bottom-right" />
-        </SafetyProvider>
+        <AuthProvider>
+          <SafetyProvider>
+            {children}
+            <Toaster position="bottom-right" />
+          </SafetyProvider>
+        </AuthProvider>
       </body>
     </html>
   );

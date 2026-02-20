@@ -4,7 +4,10 @@ import React, { useRef } from "react";
 import { Shield, Notebook, Calculator, Calendar, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMultiClickTrigger } from "@/hooks/useTriggers";
+import { useEmergencyTrigger } from "@/hooks/useEmergencyTrigger";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavigationProps {
     activeMode: string;
@@ -14,9 +17,12 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ activeMode, setActiveMode, onOpenSettings }) => {
     const logoRef = useRef<HTMLDivElement>(null);
+    const { user } = useAuth();
+
+    const { trigger } = useEmergencyTrigger();
 
     // Logo multi-click trigger
-    useMultiClickTrigger(logoRef);
+    useMultiClickTrigger(logoRef, trigger);
 
     const items = [
         { id: "notes", icon: Notebook, label: "Notes" },

@@ -13,95 +13,114 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useSafety } from "@/context/SafetyContext";
-import { ShieldAlert, Info } from "lucide-react";
+import { Settings } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/context/AuthContext";
+import { Settings } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boolean) => void }> = ({
     open,
     onOpenChange,
 }) => {
-    const { config, updateConfig } = useSafety();
+    const { user, updateUser, logout } = useAuth();
+
+    if (!user) return null;
+
+    const settings = user.safetySettings;
+
+    const handleUpdate = (updates: Partial<typeof settings>) => {
+        updateUser({
+            safetySettings: { ...settings, ...updates }
+        });
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] glass border-none">
                 <DialogHeader>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-red-100 text-red-600 rounded-full">
-                            <ShieldAlert className="w-5 h-5" />
-                        </div>
-                        <DialogTitle>Safety Protocol Configuration</DialogTitle>
-                    </div>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5" /> Workspace Settings
+                    </DialogTitle>
                     <DialogDescription>
-                        Configure the discreet triggers and recovery environment.
+                        Manage your local research profile and security triggers.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-6 py-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="shortcut" className="font-semibold">Keyboard Shortcut</Label>
-                        <Input
-                            id="shortcut"
-                            value={config.shortcut}
-                            onChange={(e) => updateConfig({ shortcut: e.target.value })}
-                            placeholder="e.g. Shift+Alt+S"
-                        />
-                        <p className="text-[10px] text-slate-500 flex items-center gap-1">
-                            <Info className="w-3 h-3" /> Currently fixed to Shift+Alt+S for demonstration.
-                        </p>
+                <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto px-1">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                            <Settings className="w-5 h-5 text-slate-400" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-bold">{user.name}</p>
+                            <p className="text-xs text-slate-500">{user.email}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={logout} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                            Log Out
+                        </Button>
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="clicks" className="font-semibold">Multi-Click Logo Threshold</Label>
-                        <Input
-                            id="clicks"
-                            type="number"
-                            value={config.multiClickThreshold}
-                            onChange={(e) => updateConfig({ multiClickThreshold: parseInt(e.target.value) || 5 })}
-                            min={2}
-                            max={10}
-                        />
-                    </div>
+                    <div className="space-y-4">
+                        <div className="grid gap-2">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Emergency Response</Label>
+                            <div className="grid gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                                <div className="grid gap-2">
+                                    <Label className="text-sm font-semibold">Emergency Number</Label>
+                                    <Input
+                                        value={settings.emergencyNumber}
+                                        onChange={(e) => handleUpdate({ emergencyNumber: e.target.value })}
+                                        placeholder="+1 (555) 000-0000"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label className="text-sm font-semibold">Safe Redirect URL</Label>
+                                    <Input
+                                        value={settings.safeUrl}
+                                        onChange={(e) => handleUpdate({ safeUrl: e.target.value })}
+                                        placeholder="https://google.com"
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-sm font-semibold">Auto-Dial Call</Label>
+                                    <Switch checked={settings.autoCall} onCheckedChange={(v: boolean) => handleUpdate({ autoCall: v })} />
+                                </div>
+                            </div>
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="safeword" className="font-semibold">Safe Word / Keyword</Label>
-                        <Input
-                            id="safeword"
-                            value={config.safeWord}
-                            onChange={(e) => updateConfig({ safeWord: e.target.value })}
-                            placeholder="Keyword to trigger safety flow"
-                        />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="url" className="font-semibold">Recovery URL</Label>
-                        <Input
-                            id="url"
-                            value={config.safeUrl}
-                            onChange={(e) => updateConfig({ safeUrl: e.target.value })}
-                            placeholder="https://..."
-                        />
-                    </div>
-
-                    <div className="grid gap-2 border-t pt-4">
-                        <Label htmlFor="emergency" className="font-semibold text-red-600 flex items-center gap-2">
-                            Emergency Contact Number
-                        </Label>
-                        <Input
-                            id="emergency"
-                            value={config.emergencyNumber}
-                            onChange={(e) => updateConfig({ emergencyNumber: e.target.value })}
-                            placeholder="e.g. 911 or personal number"
-                        />
-                        <p className="text-[10px] text-slate-500 italic">
-                            This number will be used for the simulated "Secure Call" protocol.
-                        </p>
+                        <div className="grid gap-2">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Hidden Triggers</Label>
+                            <div className="grid gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                                <div className="grid gap-2">
+                                    <Label className="text-sm font-semibold">Safe Word</Label>
+                                    <Input
+                                        value={settings.safeWord}
+                                        onChange={(e) => handleUpdate({ safeWord: e.target.value })}
+                                        placeholder="exit now"
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-sm font-semibold">Mobile Shake Detection</Label>
+                                        <p className="text-[10px] text-slate-500">Trigger on rapid movement</p>
+                                    </div>
+                                    <Switch checked={settings.shakeDetection} onCheckedChange={(v: boolean) => handleUpdate({ shakeDetection: v })} />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-sm font-semibold">Ghost Mode</Label>
+                                        <p className="text-[10px] text-slate-500">Silence all visual indicators</p>
+                                    </div>
+                                    <Switch checked={settings.ghostMode} onCheckedChange={(v: boolean) => handleUpdate({ ghostMode: v })} />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <DialogFooter>
-                    <Button onClick={() => onOpenChange(false)} className="w-full">
-                        Save and Close Settings
-                    </Button>
+                <DialogFooter className="border-t pt-4">
+                    <Button variant="secondary" className="w-full" onClick={() => onOpenChange(false)}>Close Workspace Settings</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

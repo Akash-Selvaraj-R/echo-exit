@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { NotesView } from "@/components/workspace/NotesView";
 import { CalculatorView } from "@/components/workspace/CalculatorView";
@@ -9,16 +9,41 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { PrivacyDialog } from "@/components/PrivacyDialog";
 import { useShortcutTrigger } from "@/hooks/useTriggers";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEmergencyTrigger } from "@/hooks/useEmergencyTrigger";
+import { useShakeDetection } from "@/hooks/useShakeDetection";
+import { LockScreen } from "@/components/LockScreen";
 import { useSafety } from "@/context/SafetyContext";
 import { Phone } from "lucide-react";
 
 export default function Home() {
   const [activeMode, setActiveMode] = useState("notes");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
   const { isTriggered, config } = useSafety();
 
-  // Activate global keyboard shortcut trigger
-  useShortcutTrigger();
+  // Unified Emergency Trigger
+  const { trigger, isLockActivated, setIsLockActivated } = useEmergencyTrigger();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
+
+  // Activate Triggers
+  useShortcutTrigger(trigger, "Control+Shift+L"); // New shortcut
+  useShakeDetection(trigger, user?.safetySettings.shakeDetection);
+
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="w-8 h-8 border-4 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const renderView = () => {
     switch (activeMode) {
@@ -83,6 +108,11 @@ export default function Home() {
 
       <SettingsPanel open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
       <PrivacyDialog />
+
+      <LockScreen
+        isOpen={isLockActivated}
+        onUnlock={() => setIsLockActivated(false)}
+      />
 
       <footer className="py-6 text-center text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800">
         &copy; 2026 EchoExit Research Prototype. All rights reserved.

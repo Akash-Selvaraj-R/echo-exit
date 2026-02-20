@@ -6,57 +6,64 @@ import { useSafety } from "@/context/SafetyContext";
 /**
  * Hook for keyboard shortcut trigger.
  */
-export const useShortcutTrigger = () => {
+export const useShortcutTrigger = (callback?: () => void, targetKey: string = "ShiftAltS") => {
     const { config, triggerEmergency } = useSafety();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Configuration based check (default: Shift + Alt + S)
-            const isShift = e.shiftKey;
-            const isAlt = e.altKey;
-            const isS = e.key.toLowerCase() === "s";
+            const keys: string[] = [];
+            if (e.shiftKey) keys.push("Shift");
+            if (e.altKey) keys.push("Alt");
+            if (e.ctrlKey) keys.push("Control");
+            if (e.metaKey) keys.push("Meta");
 
-            if (isShift && isAlt && isS) {
+            // Simple logic for matching
+            const currentShortcut = keys.join("") + e.key.toUpperCase();
+            const normalize = (s: string) => s.replace(/\+/g, "").toUpperCase();
+
+            if (normalize(currentShortcut) === normalize(targetKey)) {
                 e.preventDefault();
-                triggerEmergency();
+                if (callback) callback();
+                else triggerEmergency();
             }
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [triggerEmergency, config.shortcut]);
+    }, [triggerEmergency, config.shortcut, callback, targetKey]);
 };
 
 /**
  * Hook for multi-click trigger on a specific element.
  */
-export const useMultiClickTrigger = (targetRef: React.RefObject<HTMLElement | null>) => {
+export const useMultiClickTrigger = (ref: React.RefObject<HTMLElement | null>, callback?: () => void) => {
     const { config, triggerEmergency } = useSafety();
-    const clickCount = useRef(0);
-    const lastClickTime = useRef(0);
+    const clicks = useRef(0);
+    const lastClick = useRef(0);
 
     useEffect(() => {
-        const node = targetRef.current;
-        if (!node) return;
+        const element = ref.current;
+        if (!element) return;
 
         const handleClick = () => {
             const now = Date.now();
-            if (now - lastClickTime.current > 2000) {
-                clickCount.current = 1;
+            if (now - lastClick.current > 1000) {
+                clicks.current = 1;
             } else {
-                clickCount.current += 1;
+                clicks.current++;
             }
-            lastClickTime.current = now;
+            lastClick.current = now;
 
-            if (clickCount.current >= config.multiClickThreshold) {
-                triggerEmergency();
-                clickCount.current = 0; // Reset
+            if (clicks.current >= config.multiClickThreshold) {
+                if (callback) callback();
+                else triggerEmergency();
+                clicks.current = 0; // Reset
             }
         };
 
-        node.addEventListener("click", handleClick);
-        return () => node.removeEventListener("click", handleClick);
-    }, [targetRef, triggerEmergency, config.multiClickThreshold]);
+        element.addEventListener("click", handleClick);
+        return () => element.removeEventListener("click", handleClick);
+    }, [ref, triggerEmergency, config.multiClickThreshold, callback]);
 };
 
 /**
