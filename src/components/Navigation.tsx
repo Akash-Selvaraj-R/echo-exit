@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useMultiClickTrigger } from "@/hooks/useTriggers";
 import { useEmergencyTrigger } from "@/hooks/useEmergencyTrigger";
 import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
 import { useMounted } from "@/components/MountedGuard";
 
 interface NavigationProps {

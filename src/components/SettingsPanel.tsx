@@ -39,8 +39,9 @@ export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boole
     if (!mounted) return null;
 
     const handleUpdate = (updates: Partial<typeof settings>) => {
+        if (!user) return;
         updateUser({
-            safetySettings: { ...settings, ...updates }
+            safetySettings: { ...settings, ...updates },
         });
     };
 
