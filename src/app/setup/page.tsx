@@ -11,11 +11,14 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Shield, Lock, Phone, Globe, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
+import { useMounted } from "@/components/MountedGuard";
+
 export default function SetupPage() {
     const { user, updateUser } = useAuth();
     const router = useRouter();
+    const mounted = useMounted();
 
-    const [settings, setSettings] = useState(user?.safetySettings || {
+    const [settings, setSettings] = useState({
         emergencyNumber: "+917871411065",
         safeWord: "safety first",
         safeUrl: "https://www.google.com/search?q=weather+update",
@@ -24,6 +27,15 @@ export default function SetupPage() {
         shakeDetection: true,
         ghostMode: false,
     });
+
+    // Sync settings once user is loaded
+    React.useEffect(() => {
+        if (user?.safetySettings) {
+            setSettings(user.safetySettings);
+        }
+    }, [user]);
+
+    if (!mounted) return null;
 
     const handleSave = () => {
         updateUser({ safetySettings: settings });

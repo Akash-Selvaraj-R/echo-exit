@@ -16,16 +16,27 @@ import { useSafety } from "@/context/SafetyContext";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Switch } from "@/components/ui/switch";
+import { useMounted } from "@/components/MountedGuard";
 
 export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boolean) => void }> = ({
     open,
     onOpenChange,
 }) => {
     const { user, updateUser, logout } = useAuth();
+    const mounted = useMounted();
 
-    if (!user) return null;
+    // Safety check for user
+    const settings = user?.safetySettings || {
+        emergencyNumber: "",
+        safeWord: "",
+        safeUrl: "",
+        autoCall: false,
+        locationSharing: false,
+        shakeDetection: false,
+        ghostMode: false,
+    };
 
-    const settings = user.safetySettings;
+    if (!mounted) return null;
 
     const handleUpdate = (updates: Partial<typeof settings>) => {
         updateUser({

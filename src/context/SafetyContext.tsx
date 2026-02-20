@@ -36,12 +36,14 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Load config from LocalStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("echo-exit-config");
-    if (saved) {
-      try {
-        setConfig(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse safety config", e);
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("echo-exit-config");
+      if (saved) {
+        try {
+          setConfig(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse safety config", e);
+        }
       }
     }
   }, []);

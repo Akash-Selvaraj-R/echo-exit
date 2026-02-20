@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useMultiClickTrigger } from "@/hooks/useTriggers";
 import { useEmergencyTrigger } from "@/hooks/useEmergencyTrigger";
 import { useAuth } from "@/context/AuthContext";
-import { cn } from "@/lib/utils";
+import { useMounted } from "@/components/MountedGuard";
 
 interface NavigationProps {
     activeMode: string;
@@ -17,11 +17,14 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ activeMode, setActiveMode, onOpenSettings }) => {
     const logoRef = useRef<HTMLDivElement>(null);
     const { user } = useAuth();
+    const mounted = useMounted();
 
     const { trigger } = useEmergencyTrigger();
 
     // Logo multi-click trigger
     useMultiClickTrigger(logoRef, trigger);
+
+    if (!mounted) return null;
 
     const items = [
         { id: "notes", icon: Notebook, label: "Notes" },

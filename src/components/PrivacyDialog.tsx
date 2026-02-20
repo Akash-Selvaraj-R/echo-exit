@@ -13,22 +13,22 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, EyeOff, Database } from "lucide-react";
 
 export const PrivacyDialog = () => {
-    const [open, setOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         const hasConsented = localStorage.getItem("echo-exit-consent");
         if (!hasConsented) {
-            setOpen(true);
+            setIsOpen(true);
         }
     }, []);
 
-    const handleConsent = () => {
+    const handleAccept = () => {
         localStorage.setItem("echo-exit-consent", "true");
-        setOpen(false);
+        setIsOpen(false);
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <div className="flex items-center gap-2 mb-2">
@@ -69,7 +69,7 @@ export const PrivacyDialog = () => {
                 </div>
 
                 <DialogFooter>
-                    <Button onClick={handleConsent} className="w-full">
+                    <Button onClick={handleAccept} className="w-full">
                         I Understand and Consent
                     </Button>
                 </DialogFooter>

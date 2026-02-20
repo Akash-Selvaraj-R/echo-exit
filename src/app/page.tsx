@@ -16,6 +16,7 @@ import { useShakeDetection } from "@/hooks/useShakeDetection";
 import { LockScreen } from "@/components/LockScreen";
 import { useSafety } from "@/context/SafetyContext";
 import { Phone } from "lucide-react";
+import { useMounted } from "@/components/MountedGuard";
 
 export default function Home() {
   const [activeMode, setActiveMode] = useState("notes");
@@ -23,6 +24,7 @@ export default function Home() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const { isTriggered, config } = useSafety();
+  const mounted = useMounted();
 
   // Unified Emergency Trigger
   const { trigger, isLockActivated, setIsLockActivated } = useEmergencyTrigger();
@@ -37,7 +39,7 @@ export default function Home() {
   useShortcutTrigger(trigger, "Control+Shift+L"); // New shortcut
   useShakeDetection(trigger, user?.safetySettings.shakeDetection);
 
-  if (isLoading || !user) {
+  if (!mounted || isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="w-8 h-8 border-4 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin" />

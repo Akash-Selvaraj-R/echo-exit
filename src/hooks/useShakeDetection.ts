@@ -38,7 +38,7 @@ export const useShakeDetection = (onShake: () => void, enabled: boolean = true) 
         };
 
         // Request permission for iOS
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+        if (typeof window !== 'undefined' && typeof DeviceMotionEvent !== 'undefined' && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
             (DeviceMotionEvent as any).requestPermission()
                 .then((state: string) => {
                     if (state === 'granted') {
@@ -46,10 +46,14 @@ export const useShakeDetection = (onShake: () => void, enabled: boolean = true) 
                     }
                 })
                 .catch(console.error);
-        } else {
+        } else if (typeof window !== 'undefined') {
             window.addEventListener('devicemotion', handleMotion);
         }
 
-        return () => window.removeEventListener('devicemotion', handleMotion);
+        return () => {
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('devicemotion', handleMotion);
+            }
+        };
     }, [onShake, enabled]);
 };

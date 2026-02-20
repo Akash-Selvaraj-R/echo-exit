@@ -36,16 +36,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const router = useRouter();
 
     useEffect(() => {
-        const session = localStorage.getItem("echo_exit_session");
-        if (session) {
-            const userId = JSON.parse(session).id;
-            const users = JSON.parse(localStorage.getItem("echo_exit_users") || "[]");
-            const foundUser = users.find((u: User) => u.id === userId);
-            if (foundUser) {
-                setUser(foundUser);
+        if (typeof window !== "undefined") {
+            const session = localStorage.getItem("echo_exit_session");
+            if (session) {
+                try {
+                    const userId = JSON.parse(session).id;
+                    const users = JSON.parse(localStorage.getItem("echo_exit_users") || "[]");
+                    const foundUser = users.find((u: User) => u.id === userId);
+                    if (foundUser) {
+                        setUser(foundUser);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse auth session", e);
+                }
             }
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, []);
 
     const signup = async (name: string, email: string, password: string) => {
