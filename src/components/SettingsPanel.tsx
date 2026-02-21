@@ -63,8 +63,8 @@ export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boole
                             <Settings className="w-5 h-5 text-slate-400" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-sm font-bold">{user.name}</p>
-                            <p className="text-xs text-slate-500">{user.email}</p>
+                            <p className="text-sm font-bold">{user?.name}</p>
+                            <p className="text-xs text-slate-500">{user?.email}</p>
                         </div>
                         <Button variant="ghost" size="sm" onClick={logout} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
                             Log Out

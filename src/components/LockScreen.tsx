@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Lock, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useMounted } from "@/components/MountedGuard";
 
 interface LockScreenProps {
     isOpen: boolean;
@@ -17,6 +18,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ isOpen, onUnlock }) => {
     const [password, setPassword] = useState("");
     const [isError, setIsError] = useState(false);
     const { user } = useAuth();
+    const mounted = useMounted();
+
+    if (!mounted) return null;
 
     const handleUnlock = () => {
         // Simulated check - in production would be real hash check

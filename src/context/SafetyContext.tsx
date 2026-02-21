@@ -32,18 +32,18 @@ const SafetyContext = createContext<SafetyContextType | undefined>(undefined);
 export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<SafetyConfig>(DEFAULT_CONFIG);
   const [isTriggered, setIsTriggered] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   // Load config from LocalStorage on mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("echo-exit-config");
-      if (saved) {
-        try {
-          setConfig(JSON.parse(saved));
-        } catch (e) {
-          console.error("Failed to parse safety config", e);
-        }
+    setMounted(true);
+    const saved = localStorage.getItem("echo-exit-config");
+    if (saved) {
+      try {
+        setConfig(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse safety config", e);
       }
     }
   }, []);
@@ -97,6 +97,8 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       window.location.href = config.safeUrl;
     }, 1500);
   }, [config.safeUrl, isTriggered]);
+
+  if (!mounted) return null;
 
   return (
     <SafetyContext.Provider value={{ config, updateConfig, triggerEmergency, isTriggered }}>

@@ -33,25 +33,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const session = localStorage.getItem("echo_exit_session");
-            if (session) {
-                try {
-                    const userId = JSON.parse(session).id;
-                    const users = JSON.parse(localStorage.getItem("echo_exit_users") || "[]");
-                    const foundUser = users.find((u: User) => u.id === userId);
-                    if (foundUser) {
-                        setUser(foundUser);
-                    }
-                } catch (e) {
-                    console.error("Failed to parse auth session", e);
+        setMounted(true);
+        const session = localStorage.getItem("echo_exit_session");
+        if (session) {
+            try {
+                const userId = JSON.parse(session).id;
+                const users = JSON.parse(localStorage.getItem("echo_exit_users") || "[]");
+                const foundUser = users.find((u: User) => u.id === userId);
+                if (foundUser) {
+                    setUser(foundUser);
                 }
+            } catch (e) {
+                console.error("Failed to parse auth session", e);
             }
-            setIsLoading(false);
         }
+        setIsLoading(false);
     }, []);
 
     const signup = async (name: string, email: string, password: string) => {
@@ -110,6 +110,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const updatedUsers = users.map((u: User) => u.id === user.id ? updatedUser : u);
         localStorage.setItem("echo_exit_users", JSON.stringify(updatedUsers));
     };
+
+    if (!mounted) return null;
 
     return (
         <AuthContext.Provider value={{ user, login, signup, logout, updateUser, isLoading }}>
