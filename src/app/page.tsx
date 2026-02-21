@@ -69,42 +69,8 @@ export default function Home() {
       />
 
       <main className="pt-24 pb-12 px-6 max-w-6xl mx-auto min-h-screen">
-        <div className="glass rounded-3xl min-h-[70vh] backdrop-blur-sm overflow-hidden relative">
-          <AnimatePresence mode="wait">
-            {!isTriggered ? (
-              <motion.div
-                key={activeMode}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="p-8 h-full"
-              >
-                {renderView()}
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20"
-                >
-                  <Phone className="text-white w-12 h-12" />
-                </motion.div>
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Secure Call Initiated</h2>
-                <p className="text-xl text-slate-500 font-mono">{config.emergencyNumber}</p>
-                <div className="mt-8 flex gap-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className="glass rounded-3xl min-h-[70vh] backdrop-blur-sm overflow-hidden relative p-8">
+          {renderView()}
         </div>
       </main>
 

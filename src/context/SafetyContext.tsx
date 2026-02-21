@@ -10,6 +10,17 @@ interface SafetyConfig {
   safeWord: string; // e.g., "exit now"
   safeUrl: string; // e.g., "https://www.bbc.com"
   emergencyNumber: string; // e.g., "911" or a personal contact
+  psychologicalLock: boolean;
+}
+
+interface EmergencyLog {
+  timestamp: string;
+  location: string;
+  deviceContext: {
+    userAgent: string;
+    screenWidth: number;
+    screenHeight: number;
+  };
 }
 
 interface SafetyContextType {
@@ -25,6 +36,7 @@ const DEFAULT_CONFIG: SafetyConfig = {
   safeWord: "safety first",
   safeUrl: "https://www.google.com/search?q=weather+update",
   emergencyNumber: "+917871411065",
+  psychologicalLock: false,
 };
 
 const SafetyContext = createContext<SafetyContextType | undefined>(undefined);
@@ -55,10 +67,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const triggerEmergency = useCallback(async () => {
-    if (isTriggered) return;
-    setIsTriggered(true);
-
-    // 1. Collect Context
+    // 1. Capture Context Instantly
     const timestamp = new Date().toISOString();
     const deviceContext = {
       userAgent: navigator.userAgent,
@@ -66,37 +75,33 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       screenHeight: window.screen.height,
     };
 
-    // 2. Request Geolocation
-    let location = "Denied";
+    // 2. Geolocation (Local Capture)
+    let location = "Not Enabled";
     try {
-      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
-      location = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+      if (typeof navigator !== "undefined" && navigator.geolocation) {
+        // Use a timeout for geolocation to avoid blocking the redirect
+        const pos = await Promise.race([
+          new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 100 });
+          }),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 100))
+        ]);
+        if (pos) {
+          location = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+        }
+      }
     } catch (e) {
-      console.warn("Geolocation access denied or failed", e);
+      console.warn("Fast location capture failed", e);
     }
 
-    // 3. Generate Payload
-    const payload = {
-      timestamp,
-      deviceContext,
-      location,
-      emergencyNumber: config.emergencyNumber,
-      type: "EMERGENCY_TRIGGERED",
-    };
+    // 3. Store Local Log
+    const log: EmergencyLog = { timestamp, location, deviceContext };
+    const existingLogs = JSON.parse(localStorage.getItem("echo-exit-logs") || "[]");
+    localStorage.setItem("echo-exit-logs", JSON.stringify([...existingLogs, log]));
 
-    // 4. Simulate sending to backend
-    console.log("Simulating alert payload dispatch:", payload);
-    toast.success("Safety Protocol Activated", {
-      description: `Secure call initiated to ${config.emergencyNumber}. Redirecting...`,
-    });
-
-    // 5. Short delay then redirect
-    setTimeout(() => {
-      window.location.href = config.safeUrl;
-    }, 1500);
-  }, [config.safeUrl, isTriggered]);
+    // 4. Instant Redirect
+    window.location.replace(config.safeUrl);
+  }, [config.safeUrl]);
 
   if (!mounted) return null;
 

@@ -16,6 +16,7 @@ export interface User {
         locationSharing: boolean;
         shakeDetection: boolean;
         ghostMode: boolean;
+        psychologicalLock: boolean;
     };
 }
 
@@ -71,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 locationSharing: true,
                 shakeDetection: true,
                 ghostMode: false,
+                psychologicalLock: false,
             },
         };
 

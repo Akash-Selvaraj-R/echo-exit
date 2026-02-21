@@ -34,6 +34,7 @@ export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boole
         locationSharing: false,
         shakeDetection: false,
         ghostMode: false,
+        psychologicalLock: false,
     };
 
     if (!mounted) return null;
@@ -122,6 +123,13 @@ export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boole
                                         <p className="text-[10px] text-slate-500">Silence all visual indicators</p>
                                     </div>
                                     <Switch checked={settings.ghostMode} onCheckedChange={(v: boolean) => handleUpdate({ ghostMode: v })} />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-sm font-semibold">Subtle Lock</Label>
+                                        <p className="text-[10px] text-slate-500">Enable psychological barrier</p>
+                                    </div>
+                                    <Switch checked={settings.psychologicalLock} onCheckedChange={(v: boolean) => handleUpdate({ psychologicalLock: v })} />
                                 </div>
                             </div>
                         </div>

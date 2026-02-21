@@ -26,6 +26,7 @@ export default function SetupPage() {
         locationSharing: true,
         shakeDetection: true,
         ghostMode: false,
+        psychologicalLock: false,
     });
 
     // Sync settings once user is loaded
@@ -38,6 +39,10 @@ export default function SetupPage() {
     if (!mounted) return null;
 
     const handleSave = () => {
+        // Request geolocation permission explicitly during setup
+        if (settings.locationSharing && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(() => { }, () => { });
+        }
         updateUser({ safetySettings: settings });
         toast.success("Security profile configured!");
         router.push("/");
@@ -123,6 +128,17 @@ export default function SetupPage() {
                                 <Switch
                                     checked={settings.shakeDetection}
                                     onCheckedChange={(val: boolean) => setSettings({ ...settings, shakeDetection: val })}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-100/50 dark:bg-slate-800/50">
+                                <div className="space-y-0.5">
+                                    <Label className="text-sm font-medium">Subtle Lock</Label>
+                                    <p className="text-xs text-slate-500 italic">Enable psychological barrier</p>
+                                </div>
+                                <Switch
+                                    checked={settings.psychologicalLock}
+                                    onCheckedChange={(val: boolean) => setSettings({ ...settings, psychologicalLock: val })}
                                 />
                             </div>
                         </div>

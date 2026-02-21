@@ -15,19 +15,20 @@ export const useEmergencyTrigger = () => {
 
         const settings = user.safetySettings;
 
-        // 1. Activate Visual Lock instantly
-        setIsLockActivated(true);
+        // 1. Conditional Psychological Lock
+        if (settings.psychologicalLock) {
+            setIsLockActivated(true);
+        }
 
-        // 2. Perform background actions
+        // 2. Background Call Initiation (Discreet)
         if (settings.autoCall) {
+            // Standard tel: protocol - browser handles confirmation if needed
             window.location.href = `tel:${settings.emergencyNumber}`;
         }
 
-        // 3. Base protocol (payload, geolocation, redirect)
+        // 3. Execute Core Logic & Instant Redirect
+        // The SafetyContext triggerEmergency now handles window.location.replace
         await baseTrigger();
-
-        // Note: The baseTrigger in SafetyContext currently handles redirect with a delay.
-        // We'll keep that for now but ensure it pulls from user settings if possible.
     }, [user, baseTrigger]);
 
     return { trigger, isLockActivated, setIsLockActivated };
