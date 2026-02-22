@@ -7,16 +7,15 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useSafety } from "@/context/SafetyContext";
-import { Settings } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { Switch } from "@/components/ui/switch";
 import { useMounted } from "@/components/MountedGuard";
+import { Settings, LogOut, Shield, MapPin, Phone } from "lucide-react";
 
 export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boolean) => void }> = ({
     open,
@@ -25,7 +24,6 @@ export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boole
     const { user, updateUser, logout } = useAuth();
     const mounted = useMounted();
 
-    // Safety check for user
     const settings = user?.safetySettings || {
         emergencyNumber: "",
         safeWord: "",
@@ -35,6 +33,7 @@ export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boole
         shakeDetection: false,
         ghostMode: false,
         psychologicalLock: false,
+        emergencyMessage: "Emergency triggered. Please check on me.",
     };
 
     if (!mounted) return null;
@@ -48,97 +47,84 @@ export const SettingsPanel: React.FC<{ open: boolean; onOpenChange: (open: boole
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] glass border-none">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Settings className="w-5 h-5" /> Workspace Settings
-                    </DialogTitle>
-                    <DialogDescription>
-                        Manage your local research profile and security triggers.
-                    </DialogDescription>
-                </DialogHeader>
+            <DialogContent className="sm:max-w-[500px] border-none shadow-2xl bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl rounded-3xl overflow-hidden p-0">
+                <div className="p-6 pb-2">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-slate-800 dark:text-slate-100">
+                            <Settings className="w-5 h-5 text-slate-400" /> Preferences
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-slate-500">
+                            Configure your workspace and safety fallbacks.
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
 
-                <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto px-1">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                            <Settings className="w-5 h-5 text-slate-400" />
+                <div className="px-6 py-4 max-h-[60vh] overflow-y-auto space-y-6">
+                    {/* User profile tiny bar */}
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold text-sm">
+                            {user?.name?.[0]?.toUpperCase() || "U"}
                         </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-bold">{user?.name}</p>
-                            <p className="text-xs text-slate-500">{user?.email}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate">{user?.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={logout} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
-                            Log Out
+                        <Button variant="ghost" size="icon" onClick={logout} className="text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0">
+                            <LogOut className="w-4 h-4" />
                         </Button>
                     </div>
 
-                    <div className="space-y-4">
-                        <div className="grid gap-2">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Emergency Response</Label>
-                            <div className="grid gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-                                <div className="grid gap-2">
-                                    <Label className="text-sm font-semibold">Emergency Number</Label>
+                    <div className="space-y-5">
+                        <div className="space-y-3">
+                            <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 pl-1">Contacts & Messages</Label>
+                            <div className="space-y-4 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-black shadow-sm">
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium text-slate-700">Primary Contact</Label>
                                     <Input
+                                        className="bg-slate-50 border-slate-100 focus:bg-white rounded-xl"
                                         value={settings.emergencyNumber}
                                         onChange={(e) => handleUpdate({ emergencyNumber: e.target.value })}
-                                        placeholder="+1 (555) 000-0000"
                                     />
                                 </div>
-                                <div className="grid gap-2">
-                                    <Label className="text-sm font-semibold">Safe Redirect URL</Label>
-                                    <Input
-                                        value={settings.safeUrl}
-                                        onChange={(e) => handleUpdate({ safeUrl: e.target.value })}
-                                        placeholder="https://google.com"
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium text-slate-700">Auto-Message Format</Label>
+                                    <Textarea
+                                        className="bg-slate-50 border-slate-100 focus:bg-white rounded-xl min-h-[60px] text-sm resize-none"
+                                        value={settings.emergencyMessage || ""}
+                                        onChange={(e) => handleUpdate({ emergencyMessage: e.target.value })}
                                     />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-sm font-semibold">Auto-Dial Call</Label>
-                                    <Switch checked={settings.autoCall} onCheckedChange={(v: boolean) => handleUpdate({ autoCall: v })} />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Hidden Triggers</Label>
-                            <div className="grid gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-                                <div className="grid gap-2">
-                                    <Label className="text-sm font-semibold">Safe Word</Label>
-                                    <Input
-                                        value={settings.safeWord}
-                                        onChange={(e) => handleUpdate({ safeWord: e.target.value })}
-                                        placeholder="exit now"
-                                    />
-                                </div>
+                        <div className="space-y-3">
+                            <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 pl-1">Action Triggers</Label>
+                            <div className="space-y-3 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-black shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label className="text-sm font-semibold">Mobile Shake Detection</Label>
-                                        <p className="text-[10px] text-slate-500">Trigger on rapid movement</p>
+                                        <Label className="text-sm font-medium text-slate-700">Auto-Dial Protocol</Label>
+                                        <p className="text-[11px] text-slate-400">Call immediately</p>
+                                    </div>
+                                    <Switch checked={settings.autoCall} onCheckedChange={(v: boolean) => handleUpdate({ autoCall: v })} />
+                                </div>
+                                <div className="flex items-center justify-between pt-2">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-sm font-medium text-slate-700">Device Motion</Label>
+                                        <p className="text-[11px] text-slate-400">Shake to trigger</p>
                                     </div>
                                     <Switch checked={settings.shakeDetection} onCheckedChange={(v: boolean) => handleUpdate({ shakeDetection: v })} />
                                 </div>
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between pt-2">
                                     <div className="space-y-0.5">
-                                        <Label className="text-sm font-semibold">Ghost Mode</Label>
-                                        <p className="text-[10px] text-slate-500">Silence all visual indicators</p>
+                                        <Label className="text-sm font-medium text-slate-700">Attach Location</Label>
+                                        <p className="text-[11px] text-slate-400">Include GPS coordinate</p>
                                     </div>
-                                    <Switch checked={settings.ghostMode} onCheckedChange={(v: boolean) => handleUpdate({ ghostMode: v })} />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-sm font-semibold">Subtle Lock</Label>
-                                        <p className="text-[10px] text-slate-500">Enable psychological barrier</p>
-                                    </div>
-                                    <Switch checked={settings.psychologicalLock} onCheckedChange={(v: boolean) => handleUpdate({ psychologicalLock: v })} />
+                                    <Switch checked={settings.locationSharing} onCheckedChange={(v: boolean) => handleUpdate({ locationSharing: v })} />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <DialogFooter className="border-t pt-4">
-                    <Button variant="secondary" className="w-full" onClick={() => onOpenChange(false)}>Close Workspace Settings</Button>
-                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

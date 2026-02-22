@@ -17,6 +17,7 @@ export interface User {
         shakeDetection: boolean;
         ghostMode: boolean;
         psychologicalLock: boolean;
+        emergencyMessage?: string;
     };
 }
 
@@ -73,6 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 shakeDetection: true,
                 ghostMode: false,
                 psychologicalLock: false,
+                emergencyMessage: "Emergency triggered. Please check on me.",
             },
         };
 
