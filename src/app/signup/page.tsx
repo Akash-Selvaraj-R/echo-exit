@@ -6,10 +6,10 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Notebook } from "lucide-react";
+import { Shield, Mail, Lock, User, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -26,10 +26,10 @@ export default function SignupPage() {
         try {
             const success = await signup(name, email, password);
             if (success) {
-                toast.success("Account created successfully");
+                toast.success("Vault created. Welcome.");
                 router.push("/setup");
             } else {
-                toast.error("Email already in use");
+                toast.error("Email already registered.");
             }
         } finally {
             setIsLoading(false);
@@ -37,68 +37,111 @@ export default function SignupPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
-            <div className="absolute top-8 left-8 flex items-center gap-2">
-                <div className="w-8 h-8 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center">
-                    <Notebook className="w-5 h-5 text-white dark:text-black" />
-                </div>
-                <span className="font-bold text-xl tracking-tight">EchoExit</span>
+        <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#050714]">
+            {/* Animated mesh background */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-96 h-96 bg-violet-600/30 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute bottom-0 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "1s" }} />
+                <div className="absolute top-1/3 left-1/2 w-80 h-80 bg-pink-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
             </div>
 
-            <Card className="w-full max-w-md border-none shadow-xl glass">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold">Research Registration</CardTitle>
-                    <CardDescription>
-                        Create your local profile to begin using the workspace.
-                    </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="space-y-4">
+            <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="w-full max-w-md"
+            >
+                {/* Logo */}
+                <div className="flex items-center gap-3 mb-10">
+                    <div className="w-10 h-10 rounded-2xl bg-violet-500 flex items-center justify-center shadow-lg shadow-violet-500/40">
+                        <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="font-bold text-white text-xl tracking-tight">EchoExit</span>
+                </div>
+
+                {/* Card */}
+                <div className="relative p-8 rounded-[2.5rem] border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl">
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-white tracking-tight">Create your vault</h1>
+                        <p className="text-slate-400 text-sm mt-1.5">Set up your secure workspace in seconds.</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
-                            <Input
-                                id="name"
-                                placeholder="Dr. Jane Doe"
-                                required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                            />
+                            <Label className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Full Name</Label>
+                            <div className="relative">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <Input
+                                    id="name"
+                                    placeholder="Your name"
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="pl-11 h-14 bg-white/5 border-white/10 text-white rounded-2xl focus:border-violet-500/50 transition-all placeholder:text-slate-600"
+                                />
+                            </div>
                         </div>
+
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="name@university.edu"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
+                            <Label className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Email</Label>
+                            <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="pl-11 h-14 bg-white/5 border-white/10 text-white rounded-2xl focus:border-violet-500/50 transition-all placeholder:text-slate-600"
+                                />
+                            </div>
                         </div>
+
                         <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
+                            <Label className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Password</Label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="••••••••••"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="pl-11 h-14 bg-white/5 border-white/10 text-white rounded-2xl focus:border-violet-500/50 transition-all placeholder:text-slate-600"
+                                />
+                            </div>
                         </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
-                        <Button className="w-full" type="submit" disabled={isLoading}>
-                            {isLoading ? "Creating account..." : "Register"}
+
+                        <Button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full h-14 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white font-bold tracking-wide transition-all shadow-lg shadow-violet-500/30 flex items-center gap-2 text-sm mt-2"
+                        >
+                            {isLoading ? (
+                                <span className="flex items-center gap-2">
+                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Creating vault...
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-2">
+                                    Create Vault <ArrowRight className="w-4 h-4" />
+                                </span>
+                            )}
                         </Button>
-                        <div className="text-center text-sm text-slate-500">
-                            Already have an account?{" "}
-                            <Link href="/login" className="text-slate-900 dark:text-white hover:underline font-medium">
-                                Log In
-                            </Link>
-                        </div>
-                    </CardFooter>
-                </form>
-            </Card>
+                    </form>
+
+                    <div className="mt-8 text-center text-sm text-slate-500">
+                        Already have a vault?{" "}
+                        <Link href="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
+                            Sign in
+                        </Link>
+                    </div>
+                </div>
+
+                <p className="text-center text-[10px] text-slate-700 mt-8 uppercase tracking-[0.2em] font-bold">EchoExit · Research Prototype</p>
+            </motion.div>
         </div>
     );
 }

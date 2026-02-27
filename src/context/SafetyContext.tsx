@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 interface SafetyConfig {
   shortcut: string; // e.g., "Shift+Alt+S"
@@ -45,29 +46,31 @@ const DEFAULT_CONFIG: SafetyConfig = {
 const SafetyContext = createContext<SafetyContextType | undefined>(undefined);
 
 export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [config, setConfig] = useState<SafetyConfig>(DEFAULT_CONFIG);
+  const { user, updateUser } = useAuth();
   const [isTriggered, setIsTriggered] = useState(false);
   const [secureMode, setSecureMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  // Load config from LocalStorage on mount
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem("echo-exit-config");
-    if (saved) {
-      try {
-        setConfig(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse safety config", e);
-      }
-    }
   }, []);
 
+  const config: SafetyConfig = user ? {
+    shortcut: user.safetySettings.shortcutTrigger,
+    multiClickThreshold: 5,
+    safeWord: user.safetySettings.safeWord,
+    safeUrl: user.safetySettings.safeUrl,
+    emergencyNumber: user.safetySettings.emergencyNumber,
+    psychologicalLock: user.safetySettings.psychologicalLock,
+    emergencyMessage: user.safetySettings.emergencyMessage
+  } : DEFAULT_CONFIG;
+
   const updateConfig = (newConfig: Partial<SafetyConfig>) => {
-    const updated = { ...config, ...newConfig };
-    setConfig(updated);
-    localStorage.setItem("echo-exit-config", JSON.stringify(updated));
+    if (!user) return;
+    updateUser({
+      safetySettings: { ...user.safetySettings, ...newConfig }
+    });
   };
 
   const triggerEmergency = useCallback(async () => {
@@ -90,7 +93,6 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       let location = "Not Enabled";
       try {
         if (typeof navigator !== "undefined" && navigator.geolocation) {
-          // Promise.race to enforce quick resolution without blocking later actions
           const pos = await Promise.race([
             new Promise<GeolocationPosition>((resolve, reject) => {
               navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
@@ -109,15 +111,10 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const log: EmergencyLog = { timestamp, location, deviceContext };
       const existingLogs = JSON.parse(localStorage.getItem("echo-exit-logs") || "[]");
       localStorage.setItem("echo-exit-logs", JSON.stringify([...existingLogs, log]));
-
-      // Note: Message sending logic using API could be added here and executed asynchronously
     };
 
-    // Fire the tasks asynchronously
     executeBackgroundTasks();
-    
-    // We REMOVED the hard window.location.replace here to show our sleek "Secure Mode" UI.
-  }, [secureMode, config.safeUrl]);
+  }, [secureMode, user]);
 
   if (!mounted) return null;
 

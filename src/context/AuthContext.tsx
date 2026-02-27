@@ -11,6 +11,7 @@ export interface User {
     safetySettings: {
         emergencyNumber: string;
         safeWord: string;
+        shortcutTrigger: string;
         safeUrl: string;
         autoCall: boolean;
         locationSharing: boolean;
@@ -66,8 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email,
             passwordHash: btoa(password), // Very basic simulation
             safetySettings: {
-                emergencyNumber: "+917871411065", // Default
+                emergencyNumber: "+917871411065",
                 safeWord: "safety first",
+                shortcutTrigger: "ShiftAltS",
                 safeUrl: "https://www.google.com/search?q=weather+update",
                 autoCall: true,
                 locationSharing: true,
