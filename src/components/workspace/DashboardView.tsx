@@ -25,6 +25,8 @@ const TiltCard = ({ children, className, index }: { children: React.ReactNode, c
 
     const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
     const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
+    const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "0%"]);
+    const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["100%", "0%"]);
 
     const handleMouseMove = (e: React.MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -52,8 +54,17 @@ const TiltCard = ({ children, className, index }: { children: React.ReactNode, c
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-            className={`glass group relative ${className}`}
+            className={`glass group relative ${className} overflow-hidden`}
         >
+            {/* Dynamic Glare Effect */}
+            <motion.div
+                style={{
+                    left: glareX,
+                    top: glareY,
+                }}
+                className="absolute w-[200%] h-[200%] bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none rounded-full translate-x-[-50%] translate-y-[-50%] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 mix-blend-overlay"
+            />
+            
             <div style={{ transform: "translateZ(50px)", transformStyle: "preserve-3d" }}>
                 {children}
             </div>

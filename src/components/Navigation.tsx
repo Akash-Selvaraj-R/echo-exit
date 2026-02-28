@@ -15,11 +15,11 @@ interface NavigationProps {
     onOpenSettings: () => void;
 }
 
-const MagneticButton = ({ children, onClick, active, title }: { 
-    children: React.ReactNode, 
-    onClick: () => void, 
+const MagneticButton = ({ children, onClick, active, title }: {
+    children: React.ReactNode,
+    onClick: () => void,
     active?: boolean,
-    title: string 
+    title: string
 }) => {
     const ref = useRef<HTMLButtonElement>(null);
     const x = useMotionValue(0);
@@ -34,11 +34,11 @@ const MagneticButton = ({ children, onClick, active, title }: {
         const { left, top, width, height } = ref.current!.getBoundingClientRect();
         const centerX = left + width / 2;
         const centerY = top + height / 2;
-        
+
         // Limited pull effect
         const distanceX = clientX - centerX;
         const distanceY = clientY - centerY;
-        
+
         x.set(distanceX * 0.35);
         y.set(distanceY * 0.35);
     };
@@ -57,17 +57,23 @@ const MagneticButton = ({ children, onClick, active, title }: {
             title={title}
             style={{ x: springX, y: springY }}
             className={cn(
-                "relative w-12 h-12 flex items-center justify-center rounded-2xl transition-colors duration-300",
-                active 
-                    ? "bg-slate-900 text-white shadow-xl shadow-slate-900/20 active-nav" 
-                    : "text-slate-500 hover:text-slate-900 hover:bg-white/40"
+                "relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-500 overflow-hidden group",
+                active
+                    ? "bg-white/20 text-indigo-950 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6),0_8px_20px_0_rgba(31,38,135,0.2)] ring-1 ring-white/60"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-white/30 hover:shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_4px_12px_0_rgba(31,38,135,0.1)] hover:ring-1 hover:ring-white/40"
             )}
         >
-            {children}
+            {/* Dynamic Hover Glare inside Button */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+            <div className="relative z-10 transition-transform duration-300 group-hover:scale-110">
+                {children}
+            </div>
+
             {active && (
-                <motion.div 
+                <motion.div
                     layoutId="magnetic-glow"
-                    className="absolute inset-0 bg-primary/10 rounded-2xl -z-10 blur-xl"
+                    className="absolute inset-x-0 bottom-0 h-1 bg-indigo-500 blur-[2px] rounded-full z-0"
                 />
             )}
         </motion.button>
@@ -92,7 +98,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeMode, setActiveMod
     ];
 
     return (
-        <motion.nav 
+        <motion.nav
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: "spring", damping: 20, stiffness: 100 }}
@@ -141,7 +147,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeMode, setActiveMod
                 </MagneticButton>
 
                 {user && (
-                    <motion.div 
+                    <motion.div
                         whileHover={{ scale: 1.1 }}
                         className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-100 to-blue-50 flex items-center justify-center text-slate-600 font-bold text-xs ring-2 ring-white/50 shadow-sm"
                     >

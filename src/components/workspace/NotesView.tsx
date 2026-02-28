@@ -24,22 +24,25 @@ export const NotesView = () => {
 
     return (
         <Card className="w-full h-full border-none shadow-none bg-transparent">
-            <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
-                    Personal Journal
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Textarea
-                    value={note}
-                    onChange={(e) => handleChange(e.target.value)}
-                    placeholder="Start typing your notes here..."
-                    className="min-h-[500px] text-lg resize-none border-slate-200 focus-visible:ring-slate-400 dark:bg-slate-900/50"
-                />
-                <p className="text-xs text-slate-400 mt-4">
-                    All notes are saved locally only.
-                </p>
-            </CardContent>
+            {/* Using glass-panel wrapping */}
+            <div className="h-full rounded-[3rem] p-8 glass-panel flex flex-col">
+                <CardHeader className="px-0 pt-0 pb-6">
+                    <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400">
+                        Personal Journal
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="px-0 pb-0 flex-1 flex flex-col">
+                    <Textarea
+                        value={note}
+                        onChange={(e) => handleChange(e.target.value)}
+                        placeholder="Start typing your notes here..."
+                        className="flex-1 text-lg resize-none border-none bg-white/10 dark:bg-slate-900/10 focus-visible:ring-1 focus-visible:ring-indigo-400/50 rounded-2xl shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)] placeholder:text-slate-400"
+                    />
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-6 text-center">
+                        All notes are saved locally only.
+                    </p>
+                </CardContent>
+            </div>
         </Card>
     );
 };
