@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -11,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, RotateCcw } from "lucide-react";
+import { Plus, RotateCcw, Calendar } from "lucide-react";
+import { motion } from "framer-motion";
 
 type TimetableData = Record<string, string>;
 
@@ -23,7 +23,6 @@ export const TimetableView = () => {
     const [editingSlot, setEditingSlot] = useState<{ day: string; hour: string } | null>(null);
     const [tempValue, setTempValue] = useState("");
 
-    // Load from LocalStorage
     useEffect(() => {
         const saved = localStorage.getItem("echo-exit-timetable");
         if (saved) {
@@ -61,83 +60,203 @@ export const TimetableView = () => {
         }
     };
 
-    return (
-        <Card className="w-full border-none shadow-none bg-transparent">
-            <div className="rounded-[3rem] p-8 glass-panel">
-                <CardHeader className="flex flex-row items-center justify-between px-0 pt-0 pb-6">
-                    <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400">
-                        Weekly Schedule
-                    </CardTitle>
-                    <Button variant="outline" size="sm" onClick={handleReset} className="gap-2 text-xs rounded-xl bg-white/20 hover:bg-white/40 border-white/50 shadow-sm">
-                        <RotateCcw className="w-3 h-3" /> Reset
-                    </Button>
-                </CardHeader>
-                <CardContent className="px-0 pb-0">
-                    <div className="overflow-x-auto rounded-[2rem] border border-white/30 shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)] bg-white/10 backdrop-blur-md">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr>
-                                    <th className="p-4 border-b border-r border-white/20 bg-white/20 text-xs font-bold uppercase tracking-wider text-slate-500">Time</th>
-                                    {days.map((d) => (
-                                        <th key={d} className="p-4 border-b border-r last:border-r-0 border-white/20 bg-white/20 text-xs font-bold uppercase tracking-wider text-slate-500">{d}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {hours.map((h, i) => (
-                                    <tr key={h} className={i === hours.length - 1 ? "" : "border-b border-white/20"}>
-                                        <td className="p-4 border-r border-white/20 font-medium bg-white/5 text-xs text-slate-500 text-center">{h}</td>
-                                        {days.map((d, index) => {
-                                            const key = `${d}-${h}`;
-                                            const value = timetable[key];
-                                            return (
-                                                <td
-                                                    key={key}
-                                                    className={`p-4 border-r border-white/20 last:border-r-0 text-xs cursor-pointer hover:bg-white/30 transition-colors group relative ${value ? 'bg-indigo-50/30' : ''}`}
-                                                    onClick={() => handleEdit(d, h)}
-                                                >
-                                                    {value ? (
-                                                        <span className="text-slate-800 dark:text-slate-100 font-bold">{value}</span>
-                                                    ) : (
-                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <span className="text-indigo-500 bg-indigo-100/50 px-3 py-1.5 rounded-full flex items-center gap-1 font-bold shadow-sm">
-                                                                <Plus className="w-3 h-3" /> Add
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+    const currentDay = new Date().toLocaleDateString("en-US", { weekday: "short" });
 
-                    <Dialog open={!!editingSlot} onOpenChange={(open) => !open && setEditingSlot(null)}>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Update Schedule</DialogTitle>
-                                <p className="text-sm text-slate-500">
-                                    {editingSlot?.day} at {editingSlot?.hour}
-                                </p>
-                            </DialogHeader>
-                            <div className="py-4">
-                                <Input
-                                    value={tempValue}
-                                    onChange={(e) => setTempValue(e.target.value)}
-                                    placeholder="e.g. HCI Seminar, Gym, Lunch..."
-                                    autoFocus
-                                    onKeyDown={(e) => e.key === "Enter" && handleSaveSlot()}
-                                />
-                            </div>
-                            <DialogFooter>
-                                <Button variant="ghost" onClick={() => setEditingSlot(null)}>Cancel</Button>
-                                <Button onClick={handleSaveSlot}>Save Entry</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                </CardContent>
-        </Card>
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full"
+        >
+            <div
+                className="rounded-[3rem] p-8 relative overflow-hidden"
+                style={{
+                    background: "rgba(255, 255, 255, 0.3)",
+                    backdropFilter: "blur(28px) saturate(200%)",
+                    WebkitBackdropFilter: "blur(28px) saturate(200%)",
+                    border: "1px solid rgba(255, 255, 255, 0.4)",
+                    boxShadow: "inset 0 2px 4px rgba(255,255,255,0.5), 0 12px 40px rgba(99,102,241,0.06)",
+                }}
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="p-2.5 rounded-xl"
+                            style={{
+                                background: "linear-gradient(135deg, rgba(125,211,252,0.2), rgba(56,189,248,0.15))",
+                                border: "1px solid rgba(125,211,252,0.2)",
+                            }}
+                        >
+                            <Calendar className="w-4 h-4 text-sky-400" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gradient-hero">
+                            Weekly Schedule
+                        </h2>
+                    </div>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleReset}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
+                        style={{
+                            background: "rgba(249, 168, 212, 0.1)",
+                            border: "1px solid rgba(249, 168, 212, 0.2)",
+                            color: "#db2777",
+                        }}
+                    >
+                        <RotateCcw className="w-3 h-3" /> Reset
+                    </motion.button>
+                </div>
+
+                {/* Table */}
+                <div
+                    className="overflow-x-auto rounded-[2rem]"
+                    style={{
+                        background: "rgba(255, 255, 255, 0.08)",
+                        backdropFilter: "blur(12px)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        boxShadow: "inset 0 2px 10px rgba(0,0,0,0.02)",
+                    }}
+                >
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th
+                                    className="p-4 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400"
+                                    style={{
+                                        borderBottom: "1px solid rgba(255,255,255,0.15)",
+                                        borderRight: "1px solid rgba(255,255,255,0.1)",
+                                        background: "rgba(255,255,255,0.06)",
+                                    }}
+                                >
+                                    Time
+                                </th>
+                                {days.map((d) => (
+                                    <th
+                                        key={d}
+                                        className={`p-4 text-[9px] font-bold uppercase tracking-[0.2em] ${d === currentDay ? "text-indigo-500" : "text-slate-400"
+                                            }`}
+                                        style={{
+                                            borderBottom: "1px solid rgba(255,255,255,0.15)",
+                                            borderRight: "1px solid rgba(255,255,255,0.1)",
+                                            background: d === currentDay
+                                                ? "rgba(129, 140, 248, 0.06)"
+                                                : "rgba(255,255,255,0.06)",
+                                        }}
+                                    >
+                                        {d}
+                                        {d === currentDay && (
+                                            <div
+                                                className="h-0.5 w-4 mx-auto mt-1 rounded-full"
+                                                style={{ background: "linear-gradient(90deg, var(--echo-lavender), var(--echo-sky))" }}
+                                            />
+                                        )}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {hours.map((h, i) => (
+                                <tr key={h}>
+                                    <td
+                                        className="p-4 text-[10px] font-bold text-slate-400 text-center"
+                                        style={{
+                                            borderBottom: i < hours.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                                            borderRight: "1px solid rgba(255,255,255,0.1)",
+                                            background: "rgba(255,255,255,0.03)",
+                                        }}
+                                    >
+                                        {h}
+                                    </td>
+                                    {days.map((d) => {
+                                        const key = `${d}-${h}`;
+                                        const value = timetable[key];
+                                        const isCurrentDay = d === currentDay;
+                                        return (
+                                            <td
+                                                key={key}
+                                                onClick={() => handleEdit(d, h)}
+                                                className="p-4 text-xs cursor-pointer group/cell relative transition-all duration-200"
+                                                style={{
+                                                    borderBottom: i < hours.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                                                    borderRight: "1px solid rgba(255,255,255,0.1)",
+                                                    background: value
+                                                        ? "rgba(129, 140, 248, 0.06)"
+                                                        : isCurrentDay
+                                                            ? "rgba(129, 140, 248, 0.02)"
+                                                            : "transparent",
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    (e.currentTarget as HTMLElement).style.background = "rgba(196, 181, 253, 0.1)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    (e.currentTarget as HTMLElement).style.background = value
+                                                        ? "rgba(129, 140, 248, 0.06)"
+                                                        : isCurrentDay
+                                                            ? "rgba(129, 140, 248, 0.02)"
+                                                            : "transparent";
+                                                }}
+                                            >
+                                                {value ? (
+                                                    <span
+                                                        className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold"
+                                                        style={{
+                                                            background: "rgba(129, 140, 248, 0.1)",
+                                                            color: "#6366f1",
+                                                            border: "1px solid rgba(129, 140, 248, 0.15)",
+                                                        }}
+                                                    >
+                                                        {value}
+                                                    </span>
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity">
+                                                        <span
+                                                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-bold"
+                                                            style={{
+                                                                background: "rgba(129, 140, 248, 0.08)",
+                                                                color: "#818cf8",
+                                                                border: "1px solid rgba(129, 140, 248, 0.15)",
+                                                            }}
+                                                        >
+                                                            <Plus className="w-2.5 h-2.5" /> Add
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <Dialog open={!!editingSlot} onOpenChange={(open) => !open && setEditingSlot(null)}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Update Schedule</DialogTitle>
+                            <p className="text-sm text-slate-500">
+                                {editingSlot?.day} at {editingSlot?.hour}
+                            </p>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <Input
+                                value={tempValue}
+                                onChange={(e) => setTempValue(e.target.value)}
+                                placeholder="e.g. HCI Seminar, Gym, Lunch..."
+                                autoFocus
+                                onKeyDown={(e) => e.key === "Enter" && handleSaveSlot()}
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button variant="ghost" onClick={() => setEditingSlot(null)}>Cancel</Button>
+                            <Button onClick={handleSaveSlot}>Save Entry</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </motion.div>
     );
 };

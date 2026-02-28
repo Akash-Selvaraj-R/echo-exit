@@ -1,43 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, Variants, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Shield, Notebook, Calendar, BarChart2, Activity, Clock, AlertCircle, Plus } from "lucide-react";
+import { Shield, Notebook, Calendar, Activity, Clock, Plus, Zap, Heart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSafety } from "@/context/SafetyContext";
 
 const cardVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.95, y: 12 },
+    hidden: { opacity: 0, scale: 0.95, y: 16 },
     visible: (i: number) => ({
         opacity: 1,
         scale: 1,
         y: 0,
-        transition: { delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+        transition: { delay: i * 0.08, duration: 0.7, ease: [0.16, 1, 0.3, 1] },
     }),
 };
 
-const TiltCard = ({ children, className, index }: { children: React.ReactNode, className?: string, index: number }) => {
+const TiltCard = ({ children, className, index }: { children: React.ReactNode; className?: string; index: number }) => {
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
     const mouseXSpring = useSpring(x);
     const mouseYSpring = useSpring(y);
 
-    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
-    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["8deg", "-8deg"]);
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-8deg", "8deg"]);
     const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "0%"]);
     const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["100%", "0%"]);
 
     const handleMouseMove = (e: React.MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        const xPct = mouseX / width - 0.5;
-        const yPct = mouseY / height - 0.5;
-        x.set(xPct);
-        y.set(yPct);
+        x.set(e.clientX / rect.width - 0.5 - rect.left / rect.width);
+        y.set(e.clientY / rect.height - 0.5 - rect.top / rect.height);
     };
 
     const handleMouseLeave = () => {
@@ -51,28 +45,32 @@ const TiltCard = ({ children, className, index }: { children: React.ReactNode, c
             initial="hidden"
             animate="visible"
             variants={cardVariants}
-            onMouseMove={handleMouseMove}
+            onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                x.set(mouseX / rect.width - 0.5);
+                y.set(mouseY / rect.height - 0.5);
+            }}
             onMouseLeave={handleMouseLeave}
             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-            className={`glass group relative ${className} overflow-hidden transition-all duration-300 ease-out hover:brightness-[1.02]`}
+            className={`group relative overflow-hidden transition-all duration-300 ease-out hover:brightness-[1.02] ${className}`}
+            whileHover={{ scale: 1.01 }}
         >
-            {/* Dynamic Glare Effect */}
+            {/* Dynamic Glare */}
             <motion.div
-                style={{
-                    left: glareX,
-                    top: glareY,
-                }}
+                style={{ left: glareX, top: glareY }}
                 className="absolute w-[200%] h-[200%] bg-gradient-to-tr from-white/10 via-white/5 to-transparent pointer-events-none rounded-full translate-x-[-50%] translate-y-[-50%] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-50 mix-blend-overlay"
             />
 
-            <div style={{ transform: "translateZ(50px)", transformStyle: "preserve-3d" }}>
+            <div style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}>
                 {children}
             </div>
         </motion.div>
     );
 };
 
-const ProgressRing = ({ progress }: { progress: number }) => {
+const ProgressRing = ({ progress, color = "#818cf8" }: { progress: number; color?: string }) => {
     const radius = 30;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (progress / 100) * circumference;
@@ -80,31 +78,19 @@ const ProgressRing = ({ progress }: { progress: number }) => {
     return (
         <div className="relative w-20 h-20 flex items-center justify-center">
             <svg className="w-full h-full -rotate-90">
-                <circle
-                    cx="40"
-                    cy="40"
-                    r={radius}
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="transparent"
-                    className="text-slate-200/50"
-                />
+                <circle cx="40" cy="40" r={radius} stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-200/30" />
                 <motion.circle
-                    cx="40"
-                    cy="40"
-                    r={radius}
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="transparent"
-                    className="text-indigo-500"
+                    cx="40" cy="40" r={radius} stroke={color} strokeWidth="3.5" fill="transparent"
+                    strokeLinecap="round"
                     strokeDasharray={circumference}
                     initial={{ strokeDashoffset: circumference }}
                     animate={{ strokeDashoffset: offset }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    transition={{ duration: 1.8, ease: "easeOut" }}
                 />
             </svg>
-            <span className="absolute text-xs font-bold text-slate-700">{progress}%</span>
-            <div className={`absolute inset-0 bg-indigo-500/10 blur-xl rounded-full -z-10`} />
+            <span className="absolute text-xs font-bold text-slate-600">{progress}%</span>
+            {/* Glow behind ring */}
+            <div className="absolute inset-0 rounded-full -z-10" style={{ background: `${color}15`, filter: "blur(12px)" }} />
         </div>
     );
 };
@@ -112,10 +98,15 @@ const ProgressRing = ({ progress }: { progress: number }) => {
 export const DashboardView: React.FC = () => {
     const { user } = useAuth();
     const { isTriggered } = useSafety();
+    const [time, setTime] = useState(new Date());
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const dateStr = now.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
+    useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const timeStr = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const dateStr = time.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
 
     const safetySettings = user?.safetySettings;
     const configuredItems = [
@@ -127,112 +118,209 @@ export const DashboardView: React.FC = () => {
 
     const healthScore = Math.min(100, configuredItems.length * 25);
 
+    const getGreeting = () => {
+        const h = time.getHours();
+        if (h < 6) return "Late night";
+        if (h < 12) return "Good morning";
+        if (h < 17) return "Good afternoon";
+        if (h < 21) return "Good evening";
+        return "Good night";
+    };
+
     return (
-        <div className="space-y-10 pb-20">
+        <div className="space-y-8 pb-20">
             {/* Hero Header */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="max-w-2xl"
             >
                 <h1 className="text-5xl font-bold tracking-tight text-slate-800 mb-4 leading-[1.1]">
-                    Focus on what <br />
-                    <span className="text-gradient">actually matters.</span>
+                    {getGreeting()},{" "}
+                    <span className="text-gradient-hero">{user?.name?.split(" ")[0]}.</span>
+                    <br />
+                    <span className="text-gradient">Your space is ready.</span>
                 </h1>
-                <p className="text-slate-500 text-lg leading-relaxed">
-                    Good {now.getHours() < 12 ? "morning" : "day"}, {user?.name?.split(" ")[0]}. Your safe workspace is active and ready for your next big idea.
+                <p className="text-slate-400 text-lg leading-relaxed">
+                    A calm corner of the internet, designed just for you. Focus, create, and feel safe.
                 </p>
             </motion.div>
 
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <TiltCard index={0} className="p-8 rounded-[3rem] overflow-hidden">
-                    <div className="flex items-start justify-between mb-8">
-                        <div className="p-4 rounded-3xl bg-indigo-50 border border-indigo-100/50">
-                            <Shield className="w-6 h-6 text-indigo-500" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <TiltCard
+                    index={0}
+                    className="p-8 rounded-[2.5rem]"
+                >
+                    <div
+                        className="absolute inset-0 rounded-[2.5rem]"
+                        style={{
+                            background: "rgba(255, 255, 255, 0.12)",
+                            backdropFilter: "blur(20px)",
+                            border: "1px solid rgba(255, 255, 255, 0.2)",
+                        }}
+                    />
+                    <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-6">
+                            <div
+                                className="p-3.5 rounded-2xl"
+                                style={{
+                                    background: "linear-gradient(135deg, rgba(196, 181, 253, 0.2), rgba(129, 140, 248, 0.15))",
+                                    border: "1px solid rgba(196, 181, 253, 0.2)",
+                                }}
+                            >
+                                <Shield className="w-5 h-5 text-indigo-400" />
+                            </div>
+                            <ProgressRing progress={healthScore} color="#818cf8" />
                         </div>
-                        <ProgressRing progress={healthScore} />
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Safety Score</h3>
-                        <p className="text-2xl font-bold text-slate-800">
-                            {healthScore === 100 ? "Highly Protected" : "Partial Guard"}
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Safety Score</h3>
+                        <p className="text-xl font-bold text-slate-700">
+                            {healthScore === 100 ? "Fully Protected" : "Needs Attention"}
                         </p>
                     </div>
-                    <motion.div
-                        className="absolute bottom-[-10%] right-[-10%] w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full"
+                    {/* Ambient glow */}
+                    <div className="absolute bottom-[-15%] right-[-15%] w-40 h-40 rounded-full -z-10" style={{ background: "rgba(129, 140, 248, 0.06)", filter: "blur(40px)" }} />
+                </TiltCard>
+
+                <TiltCard
+                    index={1}
+                    className="p-8 rounded-[2.5rem]"
+                >
+                    <div
+                        className="absolute inset-0 rounded-[2.5rem]"
+                        style={{
+                            background: "rgba(255, 255, 255, 0.12)",
+                            backdropFilter: "blur(20px)",
+                            border: "1px solid rgba(255, 255, 255, 0.2)",
+                        }}
                     />
+                    <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-6">
+                            <div
+                                className="p-3.5 rounded-2xl"
+                                style={{
+                                    background: "linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.1))",
+                                    border: "1px solid rgba(52, 211, 153, 0.15)",
+                                }}
+                            >
+                                <Activity className="w-5 h-5 text-emerald-400" />
+                            </div>
+                            <div
+                                className="flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-bold tracking-widest"
+                                style={{
+                                    background: "rgba(52, 211, 153, 0.1)",
+                                    border: "1px solid rgba(52, 211, 153, 0.15)",
+                                    color: "#059669",
+                                }}
+                            >
+                                <motion.div
+                                    animate={{ scale: [1, 1.4, 1] }}
+                                    transition={{ repeat: Infinity, duration: 2 }}
+                                    className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                                />
+                                LIVE
+                            </div>
+                        </div>
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">System Status</h3>
+                        <p className="text-xl font-bold text-slate-700">All Systems Go</p>
+                    </div>
                 </TiltCard>
 
-                <TiltCard index={1} className="p-8 rounded-[3rem] overflow-hidden">
-                    <div className="flex items-start justify-between mb-8">
-                        <div className="p-4 rounded-3xl bg-emerald-50 border border-emerald-100/50">
-                            <Activity className="w-6 h-6 text-emerald-500" />
+                <TiltCard
+                    index={2}
+                    className="p-8 rounded-[2.5rem]"
+                >
+                    <div
+                        className="absolute inset-0 rounded-[2.5rem]"
+                        style={{
+                            background: "rgba(255, 255, 255, 0.12)",
+                            backdropFilter: "blur(20px)",
+                            border: "1px solid rgba(255, 255, 255, 0.2)",
+                        }}
+                    />
+                    <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-6">
+                            <div
+                                className="p-3.5 rounded-2xl"
+                                style={{
+                                    background: "linear-gradient(135deg, rgba(125, 211, 252, 0.15), rgba(56, 189, 248, 0.1))",
+                                    border: "1px solid rgba(125, 211, 252, 0.15)",
+                                }}
+                            >
+                                <Clock className="w-5 h-5 text-sky-400" />
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/50 border border-emerald-200 text-[10px] font-bold text-emerald-700">
-                            LIVE_LINK
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">System Status</h3>
-                        <p className="text-2xl font-bold text-slate-800">Normal Operation</p>
-                    </div>
-                </TiltCard>
-
-                <TiltCard index={2} className="p-8 rounded-[3rem] overflow-hidden">
-                    <div className="flex items-start justify-between mb-8">
-                        <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100/50">
-                            <Clock className="w-6 h-6 text-slate-500" />
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Current Time</h3>
-                        <p className="text-2xl font-bold text-slate-800">{timeStr}</p>
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Current Time</h3>
+                        <p className="text-xl font-bold text-slate-700">{timeStr}</p>
                         <p className="text-xs text-slate-400 mt-1">{dateStr}</p>
                     </div>
                 </TiltCard>
             </div>
 
-            {/* Middle Section: Widgets & Interaction */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Safety Config + New Note */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
                 <motion.div
                     custom={3}
                     initial="hidden"
                     animate="visible"
                     variants={cardVariants}
-                    className="lg:col-span-3 glass p-10 rounded-[4rem] relative overflow-hidden group"
+                    className="lg:col-span-3 p-10 rounded-[3rem] relative overflow-hidden group"
+                    style={{
+                        background: "rgba(255, 255, 255, 0.14)",
+                        backdropFilter: "blur(24px)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                    }}
                 >
                     <div className="relative z-10 h-full flex flex-col justify-between">
                         <div>
                             <div className="flex items-center gap-2 mb-4">
-                                <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400">Quick Configuration</span>
+                                <motion.div
+                                    animate={{ scale: [1, 1.3, 1] }}
+                                    transition={{ repeat: Infinity, duration: 2 }}
+                                    className="w-2 h-2 rounded-full"
+                                    style={{ background: "linear-gradient(135deg, var(--echo-lavender), var(--echo-indigo))" }}
+                                />
+                                <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-indigo-400">Quick Configuration</span>
                             </div>
-                            <h2 className="text-3xl font-bold text-slate-800 mb-6">Setup your safety <br />bubble in seconds.</h2>
+                            <h2 className="text-2xl font-bold text-slate-700 mb-6">
+                                Setup your safety <br />
+                                <span className="text-gradient">bubble in seconds.</span>
+                            </h2>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3">
                             {[
                                 { label: "Contact", icon: "📞", active: !!safetySettings?.emergencyNumber },
                                 { label: "Location", icon: "📍", active: !!safetySettings?.locationSharing },
                                 { label: "Shake", icon: "📳", active: !!safetySettings?.shakeDetection },
                                 { label: "Safe Word", icon: "🔑", active: !!safetySettings?.safeWord },
                             ].map((item, idx) => (
-                                <div
+                                <motion.div
                                     key={idx}
-                                    className={`px-4 py-3 rounded-3xl border flex items-center gap-3 transition-colors ${item.active ? 'bg-indigo-50 border-indigo-100 text-indigo-700' : 'bg-white/50 border-white/50 text-slate-400'
-                                        }`}
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="px-4 py-3 rounded-2xl flex items-center gap-3 cursor-default transition-colors"
+                                    style={{
+                                        background: item.active
+                                            ? "rgba(129, 140, 248, 0.1)"
+                                            : "rgba(255, 255, 255, 0.08)",
+                                        border: `1px solid ${item.active ? "rgba(129, 140, 248, 0.2)" : "rgba(255, 255, 255, 0.15)"}`,
+                                        color: item.active ? "#6366f1" : "#94a3b8",
+                                    }}
                                 >
                                     <span className="text-lg">{item.icon}</span>
-                                    <span className="text-[11px] font-bold uppercase tracking-wider">{item.label}</span>
-                                </div>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
+                                </motion.div>
                             ))}
                         </div>
                     </div>
 
                     {/* Background blob */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-100/30 blur-[80px] rounded-full group-hover:scale-125 transition-transform duration-1000" />
+                    <div
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full group-hover:scale-125 transition-transform duration-1000 -z-10"
+                        style={{ background: "rgba(196, 181, 253, 0.08)", filter: "blur(60px)" }}
+                    />
                 </motion.div>
 
                 <motion.div
@@ -240,27 +328,50 @@ export const DashboardView: React.FC = () => {
                     initial="hidden"
                     animate="visible"
                     variants={cardVariants}
-                    className="lg:col-span-2 glass p-10 rounded-[4rem] relative overflow-hidden bg-slate-900 group"
+                    className="lg:col-span-2 p-10 rounded-[3rem] relative overflow-hidden group"
+                    style={{
+                        background: "linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(49, 46, 129, 0.85))",
+                        backdropFilter: "blur(24px)",
+                        border: "1px solid rgba(129, 140, 248, 0.15)",
+                        boxShadow: "0 20px 60px rgba(30, 27, 75, 0.3)",
+                    }}
                 >
                     <div className="relative z-10 flex flex-col h-full justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6 border border-white/10">
-                            <Plus className="w-6 h-6 text-white" />
-                        </div>
+                        <motion.div
+                            whileHover={{ scale: 1.05, rotate: 5 }}
+                            className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6"
+                            style={{
+                                background: "rgba(255, 255, 255, 0.08)",
+                                border: "1px solid rgba(255, 255, 255, 0.1)",
+                            }}
+                        >
+                            <Plus className="w-5 h-5 text-white/80" />
+                        </motion.div>
                         <div>
                             <h3 className="text-xl font-bold text-white mb-2">Create New Note</h3>
-                            <p className="text-slate-400 text-sm mb-6">Capture ideas instantly in your secure vault.</p>
+                            <p className="text-indigo-200/60 text-sm mb-8">Capture ideas instantly in your secure vault.</p>
                             <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="w-full py-4 rounded-3xl bg-white text-slate-900 font-bold text-sm tracking-widest uppercase"
+                                whileHover={{ scale: 1.03, y: -2 }}
+                                whileTap={{ scale: 0.97 }}
+                                className="w-full py-4 rounded-2xl font-bold text-sm tracking-widest uppercase transition-all"
+                                style={{
+                                    background: "linear-gradient(135deg, #fff, #e0e7ff)",
+                                    color: "#1e1b4b",
+                                    boxShadow: "0 8px 24px rgba(255, 255, 255, 0.15)",
+                                }}
                             >
                                 Start Writing
                             </motion.button>
                         </div>
                     </div>
+
+                    {/* Gradient accent */}
+                    <div
+                        className="absolute top-0 right-0 w-40 h-40 rounded-full -z-10"
+                        style={{ background: "rgba(129, 140, 248, 0.15)", filter: "blur(50px)" }}
+                    />
                 </motion.div>
             </div>
         </div>
     );
 };
-

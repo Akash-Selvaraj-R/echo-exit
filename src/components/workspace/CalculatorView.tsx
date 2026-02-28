@@ -1,70 +1,162 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export const CalculatorView = () => {
     const [display, setDisplay] = useState("0");
+    const [pressedBtn, setPressedBtn] = useState<string | null>(null);
 
     const append = (char: string) => {
-        setDisplay((prev) => (prev === "0" ? char : prev + char));
+        setDisplay((prev) => (prev === "0" || prev === "Error" ? char : prev + char));
     };
 
     const clear = () => setDisplay("0");
+    const backspace = () => setDisplay((prev) => prev.length > 1 ? prev.slice(0, -1) : "0");
+
     const compute = () => {
         try {
-            // Simple math eval (safe for a prototype)
             // eslint-disable-next-line no-eval
-            setDisplay(eval(display).toString());
-        } catch (e) {
+            const result = eval(display);
+            setDisplay(result.toString());
+        } catch {
             setDisplay("Error");
         }
     };
 
     const buttons = [
-        "7", "8", "9", "/",
-        "4", "5", "6", "*",
-        "1", "2", "3", "-",
-        "0", ".", "=", "+"
+        { label: "C", type: "clear" },
+        { label: "⌫", type: "backspace" },
+        { label: "%", type: "op" },
+        { label: "/", type: "op" },
+        { label: "7", type: "num" },
+        { label: "8", type: "num" },
+        { label: "9", type: "num" },
+        { label: "*", type: "op" },
+        { label: "4", type: "num" },
+        { label: "5", type: "num" },
+        { label: "6", type: "num" },
+        { label: "-", type: "op" },
+        { label: "1", type: "num" },
+        { label: "2", type: "num" },
+        { label: "3", type: "num" },
+        { label: "+", type: "op" },
+        { label: "0", type: "num", span: 2 },
+        { label: ".", type: "num" },
+        { label: "=", type: "equals" },
     ];
 
+    const handleClick = (btn: typeof buttons[0]) => {
+        setPressedBtn(btn.label);
+        setTimeout(() => setPressedBtn(null), 150);
+
+        switch (btn.label) {
+            case "C": clear(); break;
+            case "⌫": backspace(); break;
+            case "=": compute(); break;
+            case "%": append("/100"); break;
+            default: append(btn.label);
+        }
+    };
+
+    const getButtonStyle = (btn: typeof buttons[0]) => {
+        if (btn.type === "equals") {
+            return {
+                background: "linear-gradient(135deg, #818cf8, #6366f1)",
+                color: "#fff",
+                boxShadow: "0 8px 24px rgba(99, 102, 241, 0.3)",
+                border: "1px solid rgba(129, 140, 248, 0.5)",
+            };
+        }
+        if (btn.type === "op") {
+            return {
+                background: "rgba(196, 181, 253, 0.12)",
+                color: "#7c3aed",
+                border: "1px solid rgba(196, 181, 253, 0.2)",
+            };
+        }
+        if (btn.type === "clear" || btn.type === "backspace") {
+            return {
+                background: "rgba(249, 168, 212, 0.1)",
+                color: "#db2777",
+                border: "1px solid rgba(249, 168, 212, 0.2)",
+            };
+        }
+        return {
+            background: "rgba(255, 255, 255, 0.12)",
+            color: "#334155",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+        };
+    };
+
     return (
-        <Card className="max-w-md mx-auto mt-10 border-none shadow-none bg-transparent">
-            <div className="rounded-[3rem] p-8 glass-panel">
-                <CardHeader className="px-0 pt-0 pb-6">
-                    <CardTitle className="text-center font-mono text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400">
-                        Standard Calculator
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="px-0 pb-0">
-                    <div className="bg-white/40 dark:bg-slate-900/40 p-4 rounded-3xl mb-6 text-right text-4xl font-mono overflow-auto h-20 flex flex-col justify-end shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)] border border-white/50">
+        <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-md mx-auto mt-6"
+        >
+            <div
+                className="rounded-[3rem] p-8 relative overflow-hidden"
+                style={{
+                    background: "rgba(255, 255, 255, 0.3)",
+                    backdropFilter: "blur(28px) saturate(200%)",
+                    WebkitBackdropFilter: "blur(28px) saturate(200%)",
+                    border: "1px solid rgba(255, 255, 255, 0.4)",
+                    boxShadow: "inset 0 2px 4px rgba(255,255,255,0.5), 0 12px 40px rgba(99,102,241,0.08)",
+                }}
+            >
+                {/* Title */}
+                <h2 className="text-center text-lg font-bold text-gradient-hero mb-6 tracking-tight">
+                    Calculator
+                </h2>
+
+                {/* Display */}
+                <div
+                    className="p-5 rounded-2xl mb-6 text-right overflow-x-auto"
+                    style={{
+                        background: "rgba(255, 255, 255, 0.25)",
+                        border: "1px solid rgba(255, 255, 255, 0.35)",
+                        boxShadow: "inset 0 2px 10px rgba(0,0,0,0.04)",
+                    }}
+                >
+                    <motion.div
+                        key={display}
+                        initial={{ opacity: 0.6, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-4xl font-bold tracking-tight text-slate-700 font-mono min-h-[3rem] flex items-end justify-end"
+                    >
                         {display}
-                    </div>
-                    <div className="grid grid-cols-4 gap-3">
-                        {buttons.map((btn) => (
-                            <Button
-                                key={btn}
-                                variant={btn === "=" ? "default" : "outline"}
-                                onClick={() => (btn === "=" ? compute() : append(btn))}
-                                className={`h-16 text-xl rounded-2xl transition-all duration-300 ${btn === "="
-                                        ? "bg-indigo-500 hover:bg-indigo-600 shadow-lg shadow-indigo-500/30 text-white"
-                                        : "bg-white/20 hover:bg-white/40 border-none shadow-sm hover:shadow-md text-slate-700 dark:text-slate-200"
-                                    }`}
-                            >
-                                {btn}
-                            </Button>
-                        ))}
-                        <Button
-                            variant="destructive"
-                            onClick={clear}
-                            className="col-span-4 h-14 mt-2 rounded-2xl bg-rose-500/90 hover:bg-rose-600 shadow-lg shadow-rose-500/20"
+                    </motion.div>
+                </div>
+
+                {/* Button Grid */}
+                <div className="grid grid-cols-4 gap-2.5">
+                    {buttons.map((btn) => (
+                        <motion.button
+                            key={btn.label}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.92 }}
+                            onClick={() => handleClick(btn)}
+                            className={`h-16 rounded-2xl font-bold text-lg transition-all duration-200 cursor-pointer ${btn.span === 2 ? "col-span-2" : ""
+                                }`}
+                            style={{
+                                ...getButtonStyle(btn),
+                                backdropFilter: "blur(8px)",
+                                transform: pressedBtn === btn.label ? "scale(0.92)" : undefined,
+                            }}
                         >
-                            Clear
-                        </Button>
-                    </div>
-                </CardContent>
+                            {btn.label}
+                        </motion.button>
+                    ))}
+                </div>
             </div>
-        </Card>
+
+            {/* Ambient glow */}
+            <div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full -z-10 pointer-events-none"
+                style={{ background: "rgba(129, 140, 248, 0.05)", filter: "blur(60px)" }}
+            />
+        </motion.div>
     );
 };
