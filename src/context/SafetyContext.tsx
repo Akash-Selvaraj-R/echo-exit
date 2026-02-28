@@ -116,7 +116,8 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     executeBackgroundTasks();
   }, [secureMode, user]);
 
-  if (!mounted) return null;
+  // We no longer return null here to allow SSR pre-rendering/static-check
+  // if (!mounted) return null;
 
   return (
     <SafetyContext.Provider value={{ config, updateConfig, triggerEmergency, isTriggered, secureMode }}>

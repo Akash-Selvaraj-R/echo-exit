@@ -117,7 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("echo_exit_users", JSON.stringify(updatedUsers));
     };
 
-    if (!mounted) return null;
+    // We no longer return null here to allow SSR pre-rendering/static-check
+    // if (!mounted) return null;
 
     return (
         <AuthContext.Provider value={{ user, login, signup, logout, updateUser, isLoading }}>
