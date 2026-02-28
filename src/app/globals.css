@@ -102,22 +102,22 @@
 @layer utilities {
   .glass {
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     @apply border border-white/20 shadow-[inset_0_1px_1px_rgba(255, 255, 255, 0.4), 0_8px_32px_0_rgba(31, 38, 135, 0.07)] transition-all duration-300;
   }
 
   .glass-dark {
     background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     @apply border border-white/10 shadow-[inset_0_1px_1px_rgba(255, 255, 255, 0.1), 0_8px_32px_0_rgba(0, 0, 0, 0.3)] transition-all duration-300;
   }
 
   .glass-panel {
     background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
     @apply border border-white/40 shadow-[inset_0_2px_4px_rgba(255, 255, 255, 0.6), 0_12px_40px_0_rgba(31, 38, 135, 0.15)] ring-1 ring-white/50 transition-all duration-500 hover:shadow-[inset_0_2px_4px_rgba(255, 255, 255, 0.7), 0_20px_50px_0_rgba(31, 38, 135, 0.2)];
   }
 
