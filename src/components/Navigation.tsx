@@ -57,14 +57,14 @@ const MagneticButton = ({ children, onClick, active, title }: {
             title={title}
             style={{ x: springX, y: springY }}
             className={cn(
-                "relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-500 overflow-hidden group",
+                "relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-300 ease-in-out overflow-hidden group hover:scale-[1.05] active:scale-[0.95]",
                 active
                     ? "bg-white/20 text-indigo-950 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6),0_8px_20px_0_rgba(31,38,135,0.2)] ring-1 ring-white/60"
-                    : "text-slate-500 hover:text-slate-900 hover:bg-white/30 hover:shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_4px_12px_0_rgba(31,38,135,0.1)] hover:ring-1 hover:ring-white/40"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-white/30 hover:shadow-[0_4px_12px_rgba(31,38,135,0.1)]"
             )}
         >
             {/* Dynamic Hover Glare inside Button */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
             <div className="relative z-10 transition-transform duration-300 group-hover:scale-110">
                 {children}

@@ -54,7 +54,7 @@ const TiltCard = ({ children, className, index }: { children: React.ReactNode, c
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-            className={`glass group relative ${className} overflow-hidden`}
+            className={`glass group relative ${className} overflow-hidden transition-all duration-300 ease-out hover:brightness-[1.02]`}
         >
             {/* Dynamic Glare Effect */}
             <motion.div
@@ -62,9 +62,9 @@ const TiltCard = ({ children, className, index }: { children: React.ReactNode, c
                     left: glareX,
                     top: glareY,
                 }}
-                className="absolute w-[200%] h-[200%] bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none rounded-full translate-x-[-50%] translate-y-[-50%] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 mix-blend-overlay"
+                className="absolute w-[200%] h-[200%] bg-gradient-to-tr from-white/10 via-white/5 to-transparent pointer-events-none rounded-full translate-x-[-50%] translate-y-[-50%] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-50 mix-blend-overlay"
             />
-            
+
             <div style={{ transform: "translateZ(50px)", transformStyle: "preserve-3d" }}>
                 {children}
             </div>
