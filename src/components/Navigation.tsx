@@ -158,4 +158,3 @@ export const Navigation: React.FC<NavigationProps> = ({ activeMode, setActiveMod
         </motion.nav>
     );
 };
-
