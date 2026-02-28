@@ -114,6 +114,23 @@
     @apply border border-white/10 shadow-[inset_0_1px_1px_rgba(255, 255, 255, 0.1), 0_8px_32px_0_rgba(0, 0, 0, 0.3)] transition-all duration-300;
   }
 
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    @apply border border-white/12 shadow-[0_8px_32px_rgba(0, 0, 0, 0.25)] transition-all duration-300;
+  }
+
+  .glossy-hover {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .glossy-hover:hover {
+    transform: translateY(-6px) scale(1.05);
+    filter: brightness(1.1) contrast(1.05);
+    @apply shadow-[0_25px_50px_-12px_rgba(0, 0, 0, 0.4)];
+  }
+
   .glass-panel {
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(24px) saturate(200%);
