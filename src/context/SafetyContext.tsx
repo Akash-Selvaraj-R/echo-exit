@@ -31,6 +31,8 @@ interface SafetyContextType {
   triggerEmergency: () => Promise<void>;
   isTriggered: boolean;
   secureMode: boolean;
+  isLockActivated: boolean;
+  setIsLockActivated: (val: boolean) => void;
 }
 
 const DEFAULT_CONFIG: SafetyConfig = {
@@ -49,6 +51,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { user, updateUser } = useAuth();
   const [isTriggered, setIsTriggered] = useState(false);
   const [secureMode, setSecureMode] = useState(false);
+  const [isLockActivated, setIsLockActivated] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
@@ -79,7 +82,29 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setIsTriggered(true);
     setSecureMode(true);
 
-    // Run async background tasks non-blockingly
+    // 1. Conditional Psychological Lock
+    const settings = user?.safetySettings;
+    if (settings?.psychologicalLock) {
+      setIsLockActivated(true);
+    }
+
+    // 2. Background Call Initiation (Discreet, slightly delayed to allow UI switch)
+    if (settings?.autoCall) {
+      setTimeout(() => {
+        // Invisible iframe to trigger tel: without navigating away
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = `tel:${settings.emergencyNumber}`;
+        document.body.appendChild(iframe);
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        }, 2000);
+      }, 300);
+    }
+
+    // 3. Run async background tasks non-blockingly
     const executeBackgroundTasks = async () => {
       // 1. Capture Context Instantly
       const timestamp = new Date().toISOString();
@@ -120,7 +145,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // if (!mounted) return null;
 
   return (
-    <SafetyContext.Provider value={{ config, updateConfig, triggerEmergency, isTriggered, secureMode }}>
+    <SafetyContext.Provider value={{ config, updateConfig, triggerEmergency, isTriggered, secureMode, isLockActivated, setIsLockActivated }}>
       {children}
     </SafetyContext.Provider>
   );
