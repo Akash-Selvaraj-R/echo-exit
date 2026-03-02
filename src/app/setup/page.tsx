@@ -21,7 +21,7 @@ export default function SetupPage() {
         emergencyNumber: "+917871411065",
         safeWord: "safety first",
         shortcutTrigger: "Control+Shift+L",
-        safeUrl: "https://www.google.com/search?q=weather+update",
+        safeUrl: "https://www.drbccchinducollege.edu.in/",
         autoCall: true,
         locationSharing: true,
         shakeDetection: true,

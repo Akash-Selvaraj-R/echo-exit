@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 emergencyNumber: "+917871411065",
                 safeWord: "safety first",
                 shortcutTrigger: "ShiftAltS",
-                safeUrl: "https://www.google.com/search?q=weather+update",
+                safeUrl: "https://www.drbccchinducollege.edu.in/",
                 // `autoCall` persisted only for legacy; the runtime always dials
                 autoCall: true,
                 locationSharing: true,

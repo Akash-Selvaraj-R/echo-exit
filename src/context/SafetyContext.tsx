@@ -43,7 +43,7 @@ const DEFAULT_CONFIG: SafetyConfig = {
   shortcut: "ShiftAltS",
   multiClickThreshold: 5,
   safeWord: "safety first",
-  safeUrl: "https://www.google.com/search?q=weather+update",
+  safeUrl: "https://www.drbccchinducollege.edu.in/",
   emergencyNumber: "+917871411065",
   psychologicalLock: false,
   emergencyMessage: "Emergency triggered. Please check on me.",
