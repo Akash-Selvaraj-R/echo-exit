@@ -10,12 +10,10 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { PrivacyDialog } from "@/components/PrivacyDialog";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ParticleField } from "@/components/ParticleField";
-import { useShortcutTrigger } from "@/hooks/useTriggers";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEmergencyTrigger } from "@/hooks/useEmergencyTrigger";
-import { useShakeDetection } from "@/hooks/useShakeDetection";
 import { LockScreen } from "@/components/LockScreen";
 import { useSafety } from "@/context/SafetyContext";
 import { ShieldCheck, Sparkles } from "lucide-react";
@@ -58,8 +56,6 @@ export default function Home() {
   }, []);
 
   // Activate Triggers
-  useShortcutTrigger(trigger, "Control+Shift+L");
-  useShakeDetection(trigger, user?.safetySettings.shakeDetection);
 
   if (!mounted || isLoading || !user) {
     return (

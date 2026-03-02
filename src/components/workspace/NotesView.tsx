@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { useKeywordTrigger } from "@/hooks/useTriggers";
 import { motion } from "framer-motion";
 import { BookOpen, Sparkles } from "lucide-react";
 
@@ -30,7 +29,6 @@ export const NotesView = () => {
         localStorage.setItem("echo-exit-note", val);
     };
 
-    useKeywordTrigger(note);
 
     const wordCount = note.trim() ? note.trim().split(/\s+/).length : 0;
     const charCount = note.length;

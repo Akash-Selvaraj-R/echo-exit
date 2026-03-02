@@ -111,7 +111,8 @@ export const DashboardView: React.FC = () => {
     const safetySettings = user?.safetySettings;
     const configuredItems = [
         safetySettings?.emergencyNumber,
-        safetySettings?.autoCall,
+        /* autoCall is always active, so we count it implicitly but don't
+           show it in the list */
         safetySettings?.locationSharing,
         safetySettings?.shakeDetection,
     ].filter(Boolean);

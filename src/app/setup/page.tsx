@@ -178,12 +178,16 @@ export default function SetupPage() {
                         >
                             <h3 className="text-[9px] font-bold uppercase tracking-[0.25em] text-indigo-400 mb-3">Preferences</h3>
 
-                            <ToggleCard
-                                label="Auto-Dial Protocol"
-                                description="Initiate call intent"
-                                checked={settings.autoCall}
-                                onChange={(val) => setSettings({ ...settings, autoCall: val })}
-                            />
+                            {/* auto-call is mandatory, no toggle provided */}
+                            <div className="px-4 py-3 rounded-xl bg-white/20 border border-white/40">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-700">Auto-Dial Protocol</p>
+                                        <p className="text-[10px] text-slate-400">Enabled by default and cannot be turned off</p>
+                                    </div>
+                                    <Switch checked={true} disabled />
+                                </div>
+                            </div>
                             <ToggleCard
                                 label="Attach Location"
                                 description="Include GPS context"

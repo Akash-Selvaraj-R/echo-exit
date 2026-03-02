@@ -153,30 +153,32 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ open, onOpenChange
                                 <SettingRow label="Location Beacon" description="Attach GPS to alerts">
                                     <Switch checked={settings.locationSharing} onCheckedChange={(val) => handleUpdate({ locationSharing: val })} />
                                 </SettingRow>
-                                <SettingRow label="Auto-Dial Assistance" description="Critical assistance protocol">
-                                    <Switch checked={settings.autoCall} onCheckedChange={(val) => handleUpdate({ autoCall: val })} />
+                                {/* secure calling is mandatory now; user cannot disable it */}
+                                <SettingRow label="Auto-Dial Assistance" description="Always active – cannot be turned off">
+                                    <Switch checked={true} disabled />
                                 </SettingRow>
                             </FloatingSection>
 
                             <FloatingSection title="Trigger Configuration" icon={Zap}>
                                 <div className="space-y-4">
-                                    <div>
-                                        <Label className="text-slate-500 text-[9px] uppercase font-bold tracking-[0.2em] pl-1 mb-2 block">Shortcut Trigger</Label>
-                                        <Input
-                                            value={settings.shortcutTrigger || ""}
-                                            onChange={(e) => handleUpdate({ shortcutTrigger: e.target.value })}
-                                            placeholder="e.g. ShiftAltS"
-                                            className="bg-white/5 border-white/8 text-white rounded-xl h-11 focus:border-indigo-500/40 transition-all placeholder:text-slate-600 text-sm"
-                                        />
+                                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 mb-2">
+                                        <div className="space-y-0.5">
+                                            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">Active Trigger</p>
+                                            <p className="text-white text-xs font-medium">Type "safety first" anywhere</p>
+                                        </div>
+                                        <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
                                     </div>
                                     <div>
-                                        <Label className="text-slate-500 text-[9px] uppercase font-bold tracking-[0.2em] pl-1 mb-2 block">Safety Keyword</Label>
+                                        <Label className="text-slate-500 text-[9px] uppercase font-bold tracking-[0.2em] pl-1 mb-2 block">Safe Redirect URL</Label>
                                         <Input
-                                            value={settings.safeWord || ""}
-                                            onChange={(e) => handleUpdate({ safeWord: e.target.value })}
-                                            placeholder="Enter safe word..."
+                                            value={settings.safeUrl || ""}
+                                            onChange={(e) => handleUpdate({ safeUrl: e.target.value })}
+                                            placeholder="e.g. https://www.google.com"
                                             className="bg-white/5 border-white/8 text-white rounded-xl h-11 focus:border-indigo-500/40 transition-all placeholder:text-slate-600 text-sm"
                                         />
+                                        <p className="text-[9px] text-slate-500 mt-2 pl-1 leading-relaxed">
+                                            The vault will instantly redirect to this URL 1.5 seconds after the trigger is typed.
+                                        </p>
                                     </div>
                                 </div>
                             </FloatingSection>

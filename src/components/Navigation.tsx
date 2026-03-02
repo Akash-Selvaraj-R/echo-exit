@@ -2,7 +2,6 @@
 
 import React, { useRef, useState } from "react";
 import { Shield, Notebook, Calculator, Calendar, Settings, LayoutDashboard } from "lucide-react";
-import { useMultiClickTrigger } from "@/hooks/useTriggers";
 import { useEmergencyTrigger } from "@/hooks/useEmergencyTrigger";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -108,7 +107,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeMode, setActiveMod
     const mounted = useMounted();
     const { trigger } = useEmergencyTrigger();
 
-    useMultiClickTrigger(logoRef, trigger);
 
     if (!mounted) return null;
 
