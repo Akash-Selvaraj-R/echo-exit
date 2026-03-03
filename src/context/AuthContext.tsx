@@ -13,6 +13,7 @@ export interface User {
         safeWord: string;
         shortcutTrigger: string;
         safeUrl: string;
+
         // technically deprecated; secure dialing happens automatically
         // whenever an emergency is triggered, so this flag is ignored.
         autoCall: boolean;
@@ -73,6 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 safeWord: "safety first",
                 shortcutTrigger: "ShiftAltS",
                 safeUrl: "https://www.drbccchinducollege.edu.in/",
+
                 // `autoCall` persisted only for legacy; the runtime always dials
                 autoCall: true,
                 locationSharing: true,

@@ -9,7 +9,8 @@ interface SafetyConfig {
   shortcut: string; // e.g., "Shift+Alt+S"
   multiClickThreshold: number; // e.g., 5
   safeWord: string; // e.g., "exit now"
-  safeUrl: string; // e.g., "https://www.bbc.com"
+  safeUrl: string; // e.g., "https://www.drbccchinducollege.edu.in/"
+
   emergencyNumber: string; // e.g., "911" or a personal contact
   psychologicalLock: boolean;
   // `autoCall` is no longer a user-controlled setting; secure dialing happens
@@ -44,6 +45,7 @@ const DEFAULT_CONFIG: SafetyConfig = {
   multiClickThreshold: 5,
   safeWord: "safety first",
   safeUrl: "https://www.drbccchinducollege.edu.in/",
+
   emergencyNumber: "+917871411065",
   psychologicalLock: false,
   emergencyMessage: "Emergency triggered. Please check on me.",
@@ -70,6 +72,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     multiClickThreshold: 5,
     safeWord: user.safetySettings.safeWord,
     safeUrl: user.safetySettings.safeUrl,
+
     emergencyNumber: user.safetySettings.emergencyNumber,
     psychologicalLock: user.safetySettings.psychologicalLock,
     emergencyMessage: user.safetySettings.emergencyMessage
@@ -170,6 +173,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setTimeout(() => {
       window.location.href = settings?.safeUrl || DEFAULT_CONFIG.safeUrl;
     }, 1500);
+
 
   }, [user, initiateSecureCall]);
 

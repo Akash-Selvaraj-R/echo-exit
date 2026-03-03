@@ -180,6 +180,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ open, onOpenChange
                                             The vault will instantly redirect to this URL 1.5 seconds after the trigger is typed.
                                         </p>
                                     </div>
+
                                 </div>
                             </FloatingSection>
 

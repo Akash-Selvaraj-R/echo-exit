@@ -173,7 +173,7 @@ export default function Home() {
 
         {/* Main Content Area */}
         <motion.main
-          className={`flex-1 relative transition-all duration-1000 ${secureMode ? "blur-sm pointer-events-none scale-[0.98]" : ""
+          className={`flex-1 relative transition-all duration-1000 ${secureMode ? "blur-xl pointer-events-none scale-[0.98]" : ""
             }`}
         >
           <AnimatePresence mode="wait">
