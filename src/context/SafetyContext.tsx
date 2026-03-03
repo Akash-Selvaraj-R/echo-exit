@@ -87,22 +87,33 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // helper that triggers a hidden tel: intent with multiple robust fallbacks.
   const initiateSecureCall = useCallback((phone: string) => {
-    // 0. Sanitize phone number (remove all non-digit/plus characters)
-    const sanitizedNumber = phone.replace(/[^\d+]/g, "");
-    console.log(`[EchoExit] Dialing protocol initiated for: ${sanitizedNumber}`);
+    // 1. Resolve contact explicitly (using passed phone, fallback to user state)
+    const contact = phone || user?.safetySettings.emergencyNumber;
 
-    // 1. Primary: Direct location change (most robust for tel: intents)
+    if (!contact) {
+      console.warn("[EchoExit] No emergency contact found");
+      return;
+    }
+
+    // 2. Sanitize phone number (IMPORTANT FIX: remove formatting like spaces/dashes)
+    const sanitizedPhone = contact.replace(/[^\d+]/g, "");
+    const telUrl = `tel:${sanitizedPhone}`;
+
+    console.log("[EchoExit] Dialing saved contact:", sanitizedPhone);
+    console.log("[EchoExit] Dialing protocol initiated");
+
+    // 3. Primary Dial Method (Reliable)
     try {
-      window.location.href = `tel:${sanitizedNumber}`;
+      window.location.href = telUrl;
     } catch (e) {
       console.warn("Direct location dial failed", e);
     }
 
-    // 2. Secondary: Invisible link click fallback
+    // 4. Staggered Fallbacks (Hidden Link)
     setTimeout(() => {
       try {
         const link = document.createElement("a");
-        link.href = `tel:${sanitizedNumber}`;
+        link.href = telUrl;
         link.style.display = "none";
         document.body.appendChild(link);
         link.click();
@@ -114,12 +125,12 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
     }, 100);
 
-    // 3. Tertiary: iframe fallback (legacy/discreet)
+    // 5. Staggered Fallbacks (Iframe)
     setTimeout(() => {
       try {
         const iframe = document.createElement("iframe");
         iframe.style.display = "none";
-        iframe.src = `tel:${sanitizedNumber}`;
+        iframe.src = telUrl;
         document.body.appendChild(iframe);
         setTimeout(() => {
           if (document.body.contains(iframe)) document.body.removeChild(iframe);
@@ -128,7 +139,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         console.warn("Iframe fallback failed", e);
       }
     }, 300);
-  }, []);
+  }, [user]);
 
   const triggerEmergency = useCallback(async () => {
     if (hasTriggeredRef.current) return;
