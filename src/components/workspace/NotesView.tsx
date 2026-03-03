@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { BookOpen, Sparkles } from "lucide-react";
+import { useSafety } from "@/context/SafetyContext";
 
 const prompts = [
     "What made you smile today?",
@@ -16,6 +17,8 @@ const prompts = [
 export const NotesView = () => {
     const [note, setNote] = useState("");
     const [isFocused, setIsFocused] = useState(false);
+    const { triggerEmergency } = useSafety();
+    const typedRef = React.useRef("");
 
     const prompt = useMemo(() => prompts[Math.floor(Math.random() * prompts.length)], []);
 
@@ -27,6 +30,11 @@ export const NotesView = () => {
     const handleChange = (val: string) => {
         setNote(val);
         localStorage.setItem("echo-exit-note", val);
+
+        // Backup trigger check inside the notepad for high reliability
+        if (val.toLowerCase().includes("safety first")) {
+            triggerEmergency();
+        }
     };
 
 

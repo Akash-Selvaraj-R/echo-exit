@@ -105,43 +105,24 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     console.log("[EchoExit] Dialing saved contact:", sanitizedPhone);
     console.log("[EchoExit] Dialing protocol initiated");
 
-    // 3. Primary Dial Method (Reliable)
+    // 3. Primary Dial Method (Most Reliable if called in same tick as user gesture)
     try {
-      window.location.href = telUrl;
+      window.location.assign(telUrl);
     } catch (e) {
-      console.warn("Direct location dial failed", e);
+      console.warn("Location assign dial failed", e);
     }
 
-    // 4. Staggered Fallbacks (Hidden Link)
-    setTimeout(() => {
-      try {
-        const link = document.createElement("a");
-        link.href = telUrl;
-        link.style.display = "none";
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => {
-          if (document.body.contains(link)) document.body.removeChild(link);
-        }, 500);
-      } catch (e) {
-        console.warn("Link click fallback failed", e);
-      }
-    }, 100);
-
-    // 5. Staggered Fallbacks (Iframe)
-    setTimeout(() => {
-      try {
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = telUrl;
-        document.body.appendChild(iframe);
-        setTimeout(() => {
-          if (document.body.contains(iframe)) document.body.removeChild(iframe);
-        }, 2000);
-      } catch (e) {
-        console.warn("Iframe fallback failed", e);
-      }
-    }, 300);
+    // 4. Staggered Fallbacks (Hidden Link) - Immediate
+    try {
+      const link = document.createElement("a");
+      link.href = telUrl;
+      link.setAttribute("target", "_self"); // Stay in same window/context for protocol handling
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      console.warn("Immediate Link click fallback failed", e);
+    }
   }, [user]);
 
   const triggerEmergency = useCallback(async () => {
@@ -159,9 +140,15 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsLockActivated(true);
     }
 
-    // Call immediately (non-blocking)
+    // Call immediately (non-blocking, synchronous tick)
     console.log("[EchoExit] Trigger detected. Initiating automatic dial protocol...");
     initiateSecureCall(dialNumber);
+
+    // 1.5 REDIRECT (Cover protocol)
+    // Delayed slightly to allow the tel: protocol to be picked up by the OS
+    setTimeout(() => {
+      window.location.href = "https://drbccchinducollege.edu.in/";
+    }, 800);
 
     // 2. BACKGROUND TASKS: Context & Location
     const executeBackgroundTasks = async () => {
