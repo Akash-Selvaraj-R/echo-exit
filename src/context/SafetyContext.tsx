@@ -9,7 +9,7 @@ interface SafetyConfig {
   shortcut: string; // e.g., "Shift+Alt+S"
   multiClickThreshold: number; // e.g., 5
   safeWord: string; // e.g., "exit now"
-  safeUrl: string; // e.g., "https://www.drbccchinducollege.edu.in/"
+  // safeUrl removed
 
   emergencyNumber: string; // e.g., "911" or a personal contact
   psychologicalLock: boolean;
@@ -44,7 +44,7 @@ const DEFAULT_CONFIG: SafetyConfig = {
   shortcut: "ShiftAltS",
   multiClickThreshold: 5,
   safeWord: "safety first",
-  safeUrl: "https://www.drbccchinducollege.edu.in/",
+  // safeUrl removed
 
   emergencyNumber: "+917871411065",
   psychologicalLock: false,
@@ -71,7 +71,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     shortcut: user.safetySettings.shortcutTrigger,
     multiClickThreshold: 5,
     safeWord: user.safetySettings.safeWord,
-    safeUrl: user.safetySettings.safeUrl,
+    // safeUrl removed
 
     emergencyNumber: user.safetySettings.emergencyNumber,
     psychologicalLock: user.safetySettings.psychologicalLock,
@@ -169,10 +169,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     executeBackgroundTasks();
 
-    // 3. SECURE REDIRECT (1.5s delay exactly as requested)
-    setTimeout(() => {
-      window.location.href = settings?.safeUrl || DEFAULT_CONFIG.safeUrl;
-    }, 1500);
+    // 3. SECURE REDIRECT REMOVED
 
 
   }, [user, initiateSecureCall]);

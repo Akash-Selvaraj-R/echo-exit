@@ -168,18 +168,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ open, onOpenChange
                                         </div>
                                         <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
                                     </div>
-                                    <div>
-                                        <Label className="text-slate-500 text-[9px] uppercase font-bold tracking-[0.2em] pl-1 mb-2 block">Safe Redirect URL</Label>
-                                        <Input
-                                            value={settings.safeUrl || ""}
-                                            onChange={(e) => handleUpdate({ safeUrl: e.target.value })}
-                                            placeholder="e.g. https://www.google.com"
-                                            className="bg-white/5 border-white/8 text-white rounded-xl h-11 focus:border-indigo-500/40 transition-all placeholder:text-slate-600 text-sm"
-                                        />
-                                        <p className="text-[9px] text-slate-500 mt-2 pl-1 leading-relaxed">
-                                            The vault will instantly redirect to this URL 1.5 seconds after the trigger is typed.
-                                        </p>
-                                    </div>
+                                    {/* Safe Redirect URL removed */}
 
                                 </div>
                             </FloatingSection>

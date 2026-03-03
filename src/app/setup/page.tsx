@@ -21,7 +21,7 @@ export default function SetupPage() {
         emergencyNumber: "+917871411065",
         safeWord: "safety first",
         shortcutTrigger: "Control+Shift+L",
-        safeUrl: "https://www.drbccchinducollege.edu.in/",
+        // safeUrl removed
         autoCall: true,
         locationSharing: true,
         shakeDetection: true,
