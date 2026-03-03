@@ -85,32 +85,49 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   };
 
-  // helper that triggers a hidden tel: intent with fallbacks.
+  // helper that triggers a hidden tel: intent with multiple robust fallbacks.
   const initiateSecureCall = useCallback((phone: string) => {
-    // 1. Try invisible link click (often more reliable on mobile)
+    // 0. Sanitize phone number (remove all non-digit/plus characters)
+    const sanitizedNumber = phone.replace(/[^\d+]/g, "");
+    console.log(`[EchoExit] Dialing protocol initiated for: ${sanitizedNumber}`);
+
+    // 1. Primary: Direct location change (most robust for tel: intents)
     try {
-      const link = document.createElement("a");
-      link.href = `tel:${phone}`;
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        if (document.body.contains(link)) document.body.removeChild(link);
-      }, 500);
+      window.location.href = `tel:${sanitizedNumber}`;
     } catch (e) {
-      console.warn("Link click fallback failed", e);
+      console.warn("Direct location dial failed", e);
     }
 
-    // 2. Try iframe fallback (discreet)
+    // 2. Secondary: Invisible link click fallback
     setTimeout(() => {
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = `tel:${phone}`;
-      document.body.appendChild(iframe);
-      setTimeout(() => {
-        if (document.body.contains(iframe)) document.body.removeChild(iframe);
-      }, 2000);
+      try {
+        const link = document.createElement("a");
+        link.href = `tel:${sanitizedNumber}`;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          if (document.body.contains(link)) document.body.removeChild(link);
+        }, 500);
+      } catch (e) {
+        console.warn("Link click fallback failed", e);
+      }
     }, 100);
+
+    // 3. Tertiary: iframe fallback (legacy/discreet)
+    setTimeout(() => {
+      try {
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = `tel:${sanitizedNumber}`;
+        document.body.appendChild(iframe);
+        setTimeout(() => {
+          if (document.body.contains(iframe)) document.body.removeChild(iframe);
+        }, 2000);
+      } catch (e) {
+        console.warn("Iframe fallback failed", e);
+      }
+    }, 300);
   }, []);
 
   const triggerEmergency = useCallback(async () => {
