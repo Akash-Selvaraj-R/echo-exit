@@ -13,6 +13,7 @@ interface SafetyConfig {
 
   emergencyNumber: string; // e.g., "911" or a personal contact
   psychologicalLock: boolean;
+  locationSharing: boolean;
   // `autoCall` is no longer a user-controlled setting; secure dialing happens
   // automatically whenever an emergency is triggered. We keep the field in the
   // persisted structure only for backward compatibility, but it is ignored.
@@ -48,6 +49,7 @@ const DEFAULT_CONFIG: SafetyConfig = {
 
   emergencyNumber: "+917871411065",
   psychologicalLock: false,
+  locationSharing: true,
   emergencyMessage: "Emergency triggered. Please check on me.",
 };
 
@@ -75,6 +77,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     emergencyNumber: user.safetySettings.emergencyNumber,
     psychologicalLock: user.safetySettings.psychologicalLock,
+    locationSharing: user.safetySettings.locationSharing,
     emergencyMessage: user.safetySettings.emergencyMessage
   } : DEFAULT_CONFIG;
 
@@ -145,23 +148,23 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (hasTriggeredRef.current) return;
     hasTriggeredRef.current = true;
 
-    // 1. IMMEDIATE UI FEEDBACK (Blur + Lock State)
+    // 1. IMMEDIATE ACTION: Auto-Dial
+    const settings = user?.safetySettings || DEFAULT_CONFIG;
+    const dialNumber = settings.emergencyNumber;
+
+    // Flip UI states immediately
     setIsTriggered(true);
     setSecureMode(true);
-
-    const settings = user?.safetySettings;
-    if (settings?.psychologicalLock) {
+    if (settings.psychologicalLock) {
       setIsLockActivated(true);
     }
 
-    // 2. START BACKGROUND TASKS (Call + Location)
-    const dialNumber = settings?.emergencyNumber || DEFAULT_CONFIG.emergencyNumber;
-
-    // Attempt call immediately after state flip
+    // Call immediately (non-blocking)
+    console.log("[EchoExit] Trigger detected. Initiating automatic dial protocol...");
     initiateSecureCall(dialNumber);
 
+    // 2. BACKGROUND TASKS: Context & Location
     const executeBackgroundTasks = async () => {
-      // Capture Context
       const timestamp = new Date().toISOString();
       const deviceContext = {
         userAgent: navigator.userAgent,
@@ -169,30 +172,28 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         screenHeight: window.screen.height,
       };
 
-      // Geolocation
       let location = "Not Enabled";
-      try {
-        if (typeof navigator !== "undefined" && navigator.geolocation) {
-          const pos = await Promise.race([
-            new Promise<GeolocationPosition>((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
-            }),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500))
-          ]);
-          if (pos) {
-            location = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-          }
+      if (settings.locationSharing && typeof navigator !== "undefined" && navigator.geolocation) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            // High accuracy and low timeout since permission should already be granted
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 0
+            });
+          });
+          location = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+          console.log("[EchoExit] Location captured successfully.");
+        } catch (e) {
+          console.warn("[EchoExit] Rapid location capture failed", e);
         }
-      } catch (e) {
-        console.warn("Location capture failed", e);
       }
 
-      // Store Log (Silent "Sharing")
       const log = { timestamp, location, deviceContext };
       const existingLogs = JSON.parse(localStorage.getItem("echo-exit-logs") || "[]");
       localStorage.setItem("echo-exit-logs", JSON.stringify([...existingLogs, log]));
-
-      console.log("[EchoExit] Emergency activation sequence complete.");
+      console.log("[EchoExit] Secure logging sequence finished.");
     };
 
     executeBackgroundTasks();

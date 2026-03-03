@@ -30,6 +30,17 @@ export default function SetupPage() {
         emergencyMessage: "Emergency triggered. Please check on me.",
     });
 
+    const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
+
+    React.useEffect(() => {
+        if (typeof window !== "undefined" && "permissions" in navigator) {
+            navigator.permissions.query({ name: 'geolocation' as PermissionName }).then((result) => {
+                setLocationAllowed(result.state === 'granted');
+                result.onchange = () => setLocationAllowed(result.state === 'granted');
+            });
+        }
+    }, []);
+
     React.useEffect(() => {
         if (user?.safetySettings) {
             setSettings((prev) => ({ ...prev, ...user.safetySettings }));
@@ -38,12 +49,22 @@ export default function SetupPage() {
 
     if (!mounted) return null;
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (settings.locationSharing && navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(() => { }, () => { });
+            try {
+                const pos = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+                setLocationAllowed(true);
+            } catch (e) {
+                console.error("Location permission denied or error:", e);
+                setLocationAllowed(false);
+                toast.error("Location permission is required for full safety features.");
+                return; // Prevent save if location is opted-in but denied
+            }
         }
         updateUser({ safetySettings: settings });
-        toast.success("Profile configured successfully.");
+        toast.success("Profile configured. Auto-dial protocol authorized.");
         router.push("/");
     };
 
@@ -179,14 +200,23 @@ export default function SetupPage() {
                             <h3 className="text-[9px] font-bold uppercase tracking-[0.25em] text-indigo-400 mb-3">Preferences</h3>
 
                             {/* auto-call is mandatory, no toggle provided */}
-                            <div className="px-4 py-3 rounded-xl bg-white/20 border border-white/40">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-slate-700">Auto-Dial Protocol</p>
-                                        <p className="text-[10px] text-slate-400">Enabled by default and cannot be turned off</p>
+                            <div
+                                className="px-4 py-4 rounded-2xl transition-all"
+                                style={{
+                                    background: "rgba(99, 102, 241, 0.08)",
+                                    border: "1px solid rgba(99, 102, 241, 0.2)",
+                                }}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <Shield className="w-4 h-4 text-indigo-500" />
+                                        <p className="text-sm font-bold text-slate-700">Auto-Dial Protocol</p>
                                     </div>
-                                    <Switch checked={true} disabled />
+                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 </div>
+                                <p className="text-[10px] text-slate-500 leading-relaxed">
+                                    I authorize Echo to automatically dial my contact and share my location when an emergency is triggered. No further confirmation will be required.
+                                </p>
                             </div>
                             <ToggleCard
                                 label="Attach Location"
